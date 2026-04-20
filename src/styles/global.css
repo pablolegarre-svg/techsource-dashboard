@@ -1495,19 +1495,38 @@ h2 {
 }
 
 @media (max-width: 980px) {
+  .sync-pill { display: none; }
+
   .topbar {
-    flex-direction: column;
-    align-items: stretch;
+    flex-direction: row;
+    flex-wrap: nowrap;
+    padding: 0 14px;
+    gap: 6px;
   }
 
   .nav {
-    flex-wrap: wrap;
-    justify-content: center;
+    flex-shrink: 1;
+    min-width: 0;
+  }
+
+  .nav-link {
+    padding: 7px 10px;
+    font-size: 0.82rem;
   }
 
   .topbar-right {
-    justify-content: space-between;
-    flex-wrap: wrap;
+    flex-shrink: 0;
+    gap: 6px;
+  }
+
+  .btn-nueva-cotizacion {
+    padding: 6px 10px;
+    font-size: 0.8rem;
+  }
+
+  .btn-login {
+    padding: 6px 10px;
+    font-size: 0.8rem;
   }
 
   .kpis {
@@ -1529,10 +1548,16 @@ h2 {
 }
 
 @media (max-width: 640px) {
-  .container,
-  .topbar {
+  .container {
     width: calc(100% - 18px);
   }
+
+  .topbar { width: 100%; padding: 0 10px; }
+
+  .logo img { height: 28px; }
+
+  .nav-link { display: none; }
+  .nav-link.active { display: inline-flex; }
 
   .kpis {
     grid-template-columns: 1fr;
@@ -2650,9 +2675,119 @@ h2 {
 }
 
 /* ═══════════════════════════════════════════
+   RESPONSIVE COTIZAR
+═══════════════════════════════════════════ */
+@media (max-width: 860px) {
+  .cotizar-layout {
+    grid-template-columns: 1fr;
+  }
+  .cotizar-sidebar-col {
+    position: static;
+    order: -1;
+  }
+  .cotizar-page {
+    width: calc(100% - 24px);
+    padding: 0;
+  }
+}
+
+@media (max-width: 540px) {
+  .cotizar-card {
+    padding: 16px 14px;
+  }
+  .cotizar-form-grid {
+    grid-template-columns: 1fr;
+  }
+  .cotizar-field-wide {
+    grid-column: 1;
+  }
+  .cotizar-cart2-controls {
+    flex-wrap: wrap;
+    gap: 6px;
+  }
+  .cotizar-resumen-total-block {
+    font-size: 1rem;
+  }
+  .product-inline-list {
+    max-height: 220px;
+  }
+}
+
+/* ── ADMIN HAMBURGUESA ───────────────────── */
+.admin-hamburger {
+  display: none;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  width: 36px;
+  height: 36px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 4px;
+  margin-left: auto;
+  flex-shrink: 0;
+}
+.admin-hamburger span {
+  display: block;
+  height: 2px;
+  background: #fff;
+  border-radius: 2px;
+  transition: all 0.2s;
+}
+
+.admin-mobile-menu {
+  position: fixed;
+  top: 54px;
+  left: 0;
+  right: 0;
+  background: #1a3461;
+  z-index: 999;
+  display: flex;
+  flex-direction: column;
+  padding: 8px 0;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.25);
+}
+.admin-mobile-link {
+  padding: 13px 24px;
+  color: rgba(255,255,255,0.75);
+  text-decoration: none;
+  font-size: 0.95rem;
+  font-weight: 500;
+  border-left: 3px solid transparent;
+  transition: all 0.15s;
+}
+.admin-mobile-link:hover,
+.admin-mobile-link.active {
+  color: #fff;
+  background: rgba(255,255,255,0.08);
+  border-left-color: #fff;
+}
+.admin-mobile-divider {
+  height: 1px;
+  background: rgba(255,255,255,0.12);
+  margin: 8px 0;
+}
+.admin-mobile-logout {
+  padding: 13px 24px;
+  background: none;
+  border: none;
+  color: rgba(255,255,255,0.5);
+  font-size: 0.9rem;
+  text-align: left;
+  cursor: pointer;
+}
+.admin-mobile-logout:hover { color: #fff; }
+
+/* ═══════════════════════════════════════════
    RESPONSIVE ADMIN
 ═══════════════════════════════════════════ */
 @media (max-width: 768px) {
+  .admin-topbar-nav { display: none; }
+  .admin-sync-pill  { display: none; }
+  .admin-nueva-btn  { display: none; }
+  .admin-hamburger  { display: flex; }
+
   .admin-shell {
     flex-direction: column;
   }

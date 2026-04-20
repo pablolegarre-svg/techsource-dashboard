@@ -27,8 +27,8 @@ export default function LoginCliente({ onClienteLogin }) {
       setPaso('no-encontrado')
       return
     }
-    if (data.permitido === false) {
-      setError('Tu cuenta no tiene acceso habilitado. Contactá al administrador.')
+    if (data.activo === false) {
+      setPaso('inactivo')
       return
     }
 
@@ -95,6 +95,30 @@ export default function LoginCliente({ onClienteLogin }) {
                 style={{ background: 'none', border: 'none', color: '#9aaabf', cursor: 'pointer', fontSize: '0.82rem' }}
               >
                 ← Intentar con otro correo
+              </button>
+            </div>
+          )}
+
+          {paso === 'inactivo' && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 16, textAlign: 'center' }}>
+              <div style={{
+                background: '#fff1f0', border: '1px solid #fbc5c3',
+                borderRadius: 12, padding: '20px 18px',
+              }}>
+                <div style={{ fontSize: 36, marginBottom: 8 }}>🚫</div>
+                <p style={{ margin: '0 0 4px', fontWeight: 600, color: '#1d315d', fontSize: '0.95rem' }}>
+                  Usuario inactivo
+                </p>
+                <p style={{ margin: 0, fontSize: '0.83rem', color: '#9b2c2c' }}>
+                  Tu usuario se encuentra inactivo. Contactá al administrador para rehabilitar tu acceso.
+                </p>
+              </div>
+              <button
+                type="button"
+                onClick={() => { setPaso('email'); setError('') }}
+                style={{ background: 'none', border: 'none', color: '#9aaabf', cursor: 'pointer', fontSize: '0.82rem' }}
+              >
+                ← Volver
               </button>
             </div>
           )}

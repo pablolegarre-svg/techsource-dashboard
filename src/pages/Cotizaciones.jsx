@@ -92,7 +92,7 @@ export default function Cotizaciones() {
 
   const columns = [
     { key: 'id', label: 'ID', render: (r) => shortId(r.id) },
-    { key: 'nombre_cliente', label: 'Cliente' },
+    { key: 'email_cliente', label: 'Email' },
     { key: 'total', label: 'Total', render: (r) => <strong>{formatearMoneda(r.total)}</strong> },
     { key: 'fecha_creacion', label: 'Fecha', render: (r) => formatearFecha(r.fecha_creacion) },
     {

@@ -96,7 +96,7 @@ export default function Proveedores() {
         <div style={{ marginBottom: 14 }}>
           <input
             className="input-filtro"
-            placeholder="Buscar por nombre o email..."
+            placeholder="Buscar por proveedor o email..."
             value={busqueda}
             onChange={(e) => { setBusqueda(e.target.value); setPage(1) }}
           />

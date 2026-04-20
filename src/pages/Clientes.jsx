@@ -27,10 +27,11 @@ export default function Clientes() {
 
   async function confirmarToggle() {
     const cliente = confirmando
-    const nuevoValor = cliente.permitido === false ? true : false
+    const nuevoValor = cliente.activo === false ? true : false
     setConfirmando(null)
-    await supabase.from('clientes').update({ permitido: nuevoValor }).eq('id', cliente.id)
-    setClientes((prev) => prev.map((c) => c.id === cliente.id ? { ...c, permitido: nuevoValor } : c))
+    const { error } = await supabase.from('clientes').update({ activo: nuevoValor }).eq('id', cliente.id)
+    if (error) { alert('Error al actualizar: ' + error.message); return }
+    setClientes((prev) => prev.map((c) => c.id === cliente.id ? { ...c, activo: nuevoValor } : c))
   }
 
   const filtrado = useMemo(() => {
@@ -45,14 +46,14 @@ export default function Clientes() {
   const paginated = paginate(filtrado, page, pageSize)
 
   const columns = [
-    { key: 'nombre_completo', label: 'Nombre' },
+    { key: 'nombre_completo', label: 'Nombre Completo' },
     { key: 'email', label: 'Email' },
     { key: 'telefono', label: 'Teléfono', render: (r) => r.telefono || '—' },
     { key: 'created_at', label: 'Registrado', render: (r) => formatearFecha(r.created_at) },
     {
-      key: 'permitido', label: 'Acceso',
+      key: 'activo', label: 'Acceso',
       render: (r) => {
-        const activo = r.permitido !== false
+        const activo = r.activo !== false
         return (
           <button
             onClick={(e) => { e.stopPropagation(); setConfirmando(r) }}
@@ -111,19 +112,19 @@ export default function Clientes() {
         <div className="modal-backdrop" onClick={() => setConfirmando(null)}>
           <div className="confirm-modal" onClick={(e) => e.stopPropagation()}>
             <p className="confirm-modal-msg">
-              {confirmando.permitido !== false
-                ? <>¿Deseas <strong>bloquear</strong> a "{confirmando.nombre_completo}"?</>
-                : <>¿Deseas <strong>habilitar</strong> a "{confirmando.nombre_completo}"?</>
+              {confirmando.activo !== false
+                ? <>¿Deseas <strong>desactivar</strong> a "{confirmando.nombre_completo}"?</>
+                : <>¿Deseas <strong>activar</strong> a "{confirmando.nombre_completo}"?</>
               }
             </p>
             <div className="confirm-modal-actions">
               <button className="confirm-modal-cancel" onClick={() => setConfirmando(null)}>Cancelar</button>
               <button
                 className="confirm-modal-ok"
-                style={{ background: confirmando.permitido !== false ? '#b42318' : '#177d48' }}
+                style={{ background: confirmando.activo !== false ? '#b42318' : '#177d48' }}
                 onClick={confirmarToggle}
               >
-                {confirmando.permitido !== false ? 'Sí, bloquear' : 'Sí, habilitar'}
+                {confirmando.activo !== false ? 'Sí, desactivar' : 'Sí, activar'}
               </button>
             </div>
           </div>
