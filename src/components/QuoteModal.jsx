@@ -133,7 +133,7 @@ export default function QuoteModal({ onClose, onSaved }) {
 
         {/* Header */}
         <div className="qm-header">
-          <h2 className="qm-title">Nueva cotización</h2>
+          <h2 className="qm-title">Solicitar cotización</h2>
           <button className="qm-close" onClick={onClose}>✕</button>
         </div>
 
