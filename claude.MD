@@ -8,7 +8,7 @@
 
 ## 1. Descripción del sistema
 
-**TechSource Solutions. ** es una plataforma web de **Supplier Sync & Smart Pricing**. Permite sincronizar precios de proveedores externos, generar cotizaciones para clientes y gestionar todo el ciclo de vida de una solicitud de compra.
+**TechSource Solutions** es una plataforma web de **Supplier Sync & Smart Pricing**. Permite sincronizar precios de proveedores externos, generar cotizaciones para clientes y gestionar todo el ciclo de vida de una solicitud de compra.
 
 **URL de producción:** Desplegado en Vercel + Supabase (PostgreSQL)
 
