@@ -75,6 +75,25 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
   doc.setTextColor(255, 255, 255)
   doc.text(fecha, pageWidth - margin, 34, { align: 'right' })
 
+  // Pill VÁLIDO HASTA en header izquierda
+  const fechaVence = new Date(cotizacion.fecha_creacion)
+  fechaVence.setHours(fechaVence.getHours() + 72)
+  const fechaVenceStr = fechaVence.toLocaleDateString('es-ES', { day: '2-digit', month: '2-digit', year: 'numeric' })
+  const vLine1 = 'VALIDO HASTA'
+  const vLine2 = fechaVenceStr
+  const vPillX = margin
+  const vPillY = 28
+  const vPillW = 32
+  const vPillH = 9
+  doc.setFillColor(242, 166, 30)
+  doc.roundedRect(vPillX, vPillY, vPillW, vPillH, 2, 2, 'F')
+  doc.setTextColor(60, 35, 0)
+  doc.setFont('helvetica', 'bold')
+  doc.setFontSize(5.5)
+  doc.text(vLine1, vPillX + vPillW / 2, vPillY + 3.5, { align: 'center' })
+  doc.setFontSize(7)
+  doc.text(vLine2, vPillX + vPillW / 2, vPillY + 7.2, { align: 'center' })
+
   y = headerH + 10
 
   // ── DATOS CLIENTE ────────────────────────────────────────
@@ -125,8 +144,8 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
 
   // ── TABLE ────────────────────────────────────────────────
   const headCols = isAdmin
-    ? ['PRODUCTO', 'CATEGORÍA', 'PROVEEDOR', 'PRECIO UNIT.', 'CANT.', 'SUBTOTAL']
-    : ['PRODUCTO', 'CATEGORÍA', 'PRECIO UNIT.', 'CANT.', 'SUBTOTAL']
+    ? ['PRODUCTO', 'CATEGORIA', 'PROVEEDOR', 'PRECIO', 'QTY', 'SUBTOTAL']
+    : ['PRODUCTO', 'CATEGORIA', 'PRECIO', 'QTY', 'SUBTOTAL']
 
   const bodyRows = productos.map(p => isAdmin
     ? [p.nombre || '', p.categoria || '', p.proveedor || '', `$${Number(p.precio_unitario || 0).toFixed(0)}`, String(p.cantidad || 1), `$${Number(p.subtotal || 0).toFixed(0)}`]
@@ -143,21 +162,22 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
   const totalColIdx  = isAdmin ? 5 : 4
   const provColIdx   = isAdmin ? 2 : -1
 
+  // contentWidth = 182mm
   const colStyles = isAdmin
     ? {
-        0: { cellWidth: 50, fontStyle: 'bold' },
-        1: { cellWidth: 24 },
-        2: { cellWidth: 34 },
-        3: { cellWidth: 26, halign: 'right' },
-        4: { cellWidth: 12, halign: 'center' },
-        5: { cellWidth: 36, halign: 'right', fontStyle: 'bold' },
+        0: { cellWidth: 64, fontStyle: 'bold' },   // Producto
+        1: { cellWidth: 28 },                       // Categoria
+        2: { cellWidth: 32 },                       // Proveedor
+        3: { cellWidth: 22, halign: 'right' },      // Precio
+        4: { cellWidth: 12, halign: 'center' },     // Qty
+        5: { cellWidth: 24, halign: 'right', fontStyle: 'bold' }, // Subtotal
       }
     : {
-        0: { cellWidth: 66, fontStyle: 'bold' },
-        1: { cellWidth: 34 },
-        2: { cellWidth: 36, halign: 'right' },
-        3: { cellWidth: 16, halign: 'center' },
-        4: { cellWidth: 30, halign: 'right', fontStyle: 'bold' },
+        0: { cellWidth: 82, fontStyle: 'bold' },   // Producto
+        1: { cellWidth: 34 },                       // Categoria
+        2: { cellWidth: 28, halign: 'right' },      // Precio
+        3: { cellWidth: 12, halign: 'center' },     // Qty
+        4: { cellWidth: 26, halign: 'right', fontStyle: 'bold' }, // Subtotal
       }
 
   autoTable(doc, {
@@ -171,19 +191,20 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
       textColor: [255, 255, 255],
       fontStyle: 'bold',
       fontSize: 8,
-      cellPadding: { top: 5, bottom: 5, left: 4, right: 4 },
+      cellPadding: { top: 6, bottom: 6, left: 4, right: 4 },
+      overflow: 'hidden',
     },
     bodyStyles: {
       fontSize: 9,
       textColor: textColor,
-      cellPadding: { top: 7, bottom: 7, left: 4, right: 4 },
-      minCellHeight: 14,
+      cellPadding: { top: 5, bottom: 5, left: 4, right: 4 },
+      minCellHeight: 11,
     },
     footStyles: {
       fillColor: navy,
       textColor: [255, 255, 255],
       fontStyle: 'bold',
-      fontSize: 13,
+      fontSize: 10,
       cellPadding: { top: 6, bottom: 6, left: 4, right: 4 },
     },
     columnStyles: colStyles,
@@ -274,30 +295,18 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
   doc.setLineWidth(0.3)
   doc.line(margin, footY - 4, pageWidth - margin, footY - 4)
 
-  // Left: company + pill
+  // Left: company name
   doc.setTextColor(...navy)
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(9)
   doc.text('TechSource Supplier', margin, footY + 2)
 
-  // Pill VÁLIDO POR 15 DÍAS
-  const pillX = margin + 44
-  const pillW = 36
-  doc.setFillColor(232, 239, 249)
-  doc.setDrawColor(...blue)
-  doc.setLineWidth(0.5)
-  doc.roundedRect(pillX, footY - 3, pillW, 7, 3, 3, 'FD')
-  doc.setTextColor(...blue)
-  doc.setFont('helvetica', 'bold')
-  doc.setFontSize(6.5)
-  doc.text('VÁLIDO POR 15 DÍAS', pillX + pillW / 2, footY + 2, { align: 'center' })
-
   // Right: contact
   doc.setTextColor(...muted)
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(8)
-  doc.text('parts@techsource.com', pageWidth - margin, footY, { align: 'right' })
-  doc.text('www.techsource.com', pageWidth - margin, footY + 5, { align: 'right' })
+  doc.text('techsource2026@gmail.com', pageWidth - margin, footY, { align: 'right' })
+  doc.text('techsource-dashboard-sigma.vercel.app', pageWidth - margin, footY + 5, { align: 'right' })
 
   doc.save(`Cotizacion_TechSource_${String(cotizacion.id).substring(0, 8)}.pdf`)
 }

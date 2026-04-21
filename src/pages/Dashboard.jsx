@@ -59,7 +59,7 @@ export default function Dashboard() {
       <section className="dash-banner">
         <div>
           <p className="dash-banner-eyebrow">Panel de control</p>
-          <h1 className="dash-banner-title">Supplier Sync &amp; Smart Pricing</h1>
+          <h1 className="dash-banner-title">Sincronización de proveedores y precios inteligentes</h1>
           <p className="dash-banner-sub">Monitoreo de proveedores, precios y cotizaciones en tiempo real.</p>
         </div>
         <div className="dash-banner-badge">
