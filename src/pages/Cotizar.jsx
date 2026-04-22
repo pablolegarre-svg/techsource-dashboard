@@ -132,9 +132,7 @@ export default function Cotizar({ clienteSession }) {
           <p style={{ color: '#9aaabf', fontSize: '0.82rem', marginBottom: 24 }}>
             ID {String(guardada.id).substring(0, 8)} · Te enviamos un correo con el resumen de tu cotización.
           </p>
-          <p style={{ color: '#5b6f93', fontSize: '0.88rem', marginBottom: 16 }}>
-          Te enviamos un correo con el detalle completo para que puedas revisarlo.
-          </p>
+
           {!guardada.precios_vigentes && (
             <div className="warning-card" style={{ marginBottom: 20, textAlign: 'center' }}>
               ⚠ Algunos precios pueden haber cambiado, te lo confirmamos al contactarte.
