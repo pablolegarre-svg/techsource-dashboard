@@ -55,7 +55,7 @@ export default function Cotizaciones() {
   function cargar() {
     setLoading(true)
     supabase
-      .from('vista_cotizaciones_clientes')
+      .from('cotizaciones_con_estado')
       .select('*')
       .order('fecha_creacion', { ascending: false })
       .then(({ data }) => { setCotizaciones(data || []); setLoading(false) })
@@ -74,8 +74,8 @@ export default function Cotizaciones() {
   const filtrado = useMemo(() => {
     return cotizaciones.filter((item) => {
       const id = (item.id || '').toLowerCase()
-      const cliente = (item.nombre_cliente || '').toLowerCase()
-      const email = (item.email_cliente || '').toLowerCase()
+      const cliente = (item.nombre_completo || '').toLowerCase()
+      const email = (item.email || '').toLowerCase()
       const fecha = item.fecha_creacion ? new Date(item.fecha_creacion) : null
       const cumpleTexto = !busqueda || id.includes(busqueda.toLowerCase()) || cliente.includes(busqueda.toLowerCase()) || email.includes(busqueda.toLowerCase())
       const cumpleEstado = !filtroEstado || item.estado === filtroEstado
@@ -92,7 +92,7 @@ export default function Cotizaciones() {
 
   const columns = [
     { key: 'id', label: 'ID', render: (r) => shortId(r.id) },
-    { key: 'email_cliente', label: 'Email' },
+    { key: 'email', label: 'Email' },
     { key: 'total', label: 'Total', render: (r) => <strong>{formatearMoneda(r.total)}</strong> },
     { key: 'fecha_creacion', label: 'Fecha', render: (r) => formatearFecha(r.fecha_creacion) },
     {
@@ -110,10 +110,10 @@ export default function Cotizaciones() {
         </select>
       ),
     },
-    { key: 'precios_vigentes', label: 'Validación', render: (r) =>
-      r.precios_vigentes
-        ? <span className="badge badge-green">◔ Vigentes</span>
-        : <span className="badge badge-yellow">⚠ Verificar</span>
+    { key: 'mas_tres_dias', label: 'Vigencia', render: (r) =>
+      r.mas_tres_dias === 'Expiró'
+        ? <span className="badge badge-red">Expiró</span>
+        : <span className="badge badge-green">Vigente</span>
     },
     { key: 'acciones', label: '', render: (r) => (
       <div style={{ display: 'flex', gap: 6 }}>
@@ -170,8 +170,8 @@ function DetalleModal({ cotizacion, onClose, onCambiarEstado }) {
     <Modal title="Detalle de cotización" onClose={onClose} maxWidth={860}>
       <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start', flexWrap: 'wrap', gap: 12, marginBottom: 16 }}>
         <div>
-          <p style={{ margin: '0 0 4px' }}><strong>Cliente:</strong> {cotizacion.nombre_cliente}</p>
-          <p style={{ margin: '0 0 4px' }}><strong>Email:</strong> {cotizacion.email_cliente}</p>
+          <p style={{ margin: '0 0 4px' }}><strong>Cliente:</strong> {cotizacion.nombre_completo}</p>
+          <p style={{ margin: '0 0 4px' }}><strong>Email:</strong> {cotizacion.email}</p>
           <p style={{ margin: 0 }}><strong>Total:</strong> {formatearMoneda(cotizacion.total)} <span style={{ color: '#6b7c98', fontWeight: 400, fontSize: '0.85rem' }}>USD</span></p>
         </div>
         <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'flex-end', gap: 6 }}>

@@ -61,11 +61,6 @@ export default function MisCotizaciones({ clienteSession }) {
         {ESTADO_LABEL[r.estado] || r.estado}
       </span>
     )},
-    { key: 'precios_vigentes', label: 'Validación', render: (r) =>
-      r.precios_vigentes
-        ? <span className="badge badge-green">◔ Vigentes</span>
-        : <span className="badge badge-yellow">⚠ Verificar</span>
-    },
     { key: 'acciones', label: '', render: (r) => (
       <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
         {/* Botones aceptar/rechazar deshabilitados — el cliente gestiona desde el email (N8N)

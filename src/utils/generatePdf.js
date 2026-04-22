@@ -119,7 +119,7 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.setTextColor(...textColor)
-  doc.text(cotizacion.nombre_cliente || '', margin + 28, y + 13)
+  doc.text(cotizacion.nombre_cliente || cotizacion.nombre_completo || '', margin + 28, y + 13)
 
   doc.setFont('helvetica', 'bold')
   doc.setFontSize(8)
@@ -128,7 +128,7 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
   doc.setFont('helvetica', 'normal')
   doc.setFontSize(10)
   doc.setTextColor(...textColor)
-  doc.text(cotizacion.email_cliente || '', margin + 28, y + 20)
+  doc.text(cotizacion.email_cliente || cotizacion.email || '', margin + 28, y + 20)
 
   y += clientH + 10
 
@@ -144,8 +144,8 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
 
   // ── TABLE ────────────────────────────────────────────────
   const headCols = isAdmin
-    ? ['PRODUCTO', 'CATEGORIA', 'PROVEEDOR', 'PRECIO', 'QTY', 'SUBTOTAL']
-    : ['PRODUCTO', 'CATEGORIA', 'PRECIO', 'QTY', 'SUBTOTAL']
+    ? ['PRODUCTO', 'CATEGORIA', 'PROVEEDOR', 'PRECIO', 'CANT', 'SUBTOTAL']
+    : ['PRODUCTO', 'CATEGORIA', 'PRECIO', 'CANT', 'SUBTOTAL']
 
   const bodyRows = productos.map(p => isAdmin
     ? [p.nombre || '', p.categoria || '', p.proveedor || '', `$${Number(p.precio_unitario || 0).toFixed(0)}`, String(p.cantidad || 1), `$${Number(p.subtotal || 0).toFixed(0)}`]
@@ -165,18 +165,18 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
   // contentWidth = 182mm
   const colStyles = isAdmin
     ? {
-        0: { cellWidth: 64, fontStyle: 'bold' },   // Producto
-        1: { cellWidth: 28 },                       // Categoria
-        2: { cellWidth: 32 },                       // Proveedor
+        0: { cellWidth: 58, fontStyle: 'bold' },   // Producto
+        1: { cellWidth: 26 },                       // Categoria
+        2: { cellWidth: 40 },                       // Proveedor
         3: { cellWidth: 22, halign: 'right' },      // Precio
-        4: { cellWidth: 12, halign: 'center' },     // Qty
+        4: { cellWidth: 12, halign: 'center' },     // Cant
         5: { cellWidth: 24, halign: 'right', fontStyle: 'bold' }, // Subtotal
       }
     : {
         0: { cellWidth: 82, fontStyle: 'bold' },   // Producto
         1: { cellWidth: 34 },                       // Categoria
         2: { cellWidth: 28, halign: 'right' },      // Precio
-        3: { cellWidth: 12, halign: 'center' },     // Qty
+        3: { cellWidth: 12, halign: 'center' },     // Cant
         4: { cellWidth: 26, halign: 'right', fontStyle: 'bold' }, // Subtotal
       }
 
@@ -190,12 +190,12 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
       fillColor: navy,
       textColor: [255, 255, 255],
       fontStyle: 'bold',
-      fontSize: 8,
+      fontSize: 7,
       cellPadding: { top: 6, bottom: 6, left: 4, right: 4 },
       overflow: 'hidden',
     },
     bodyStyles: {
-      fontSize: 9,
+      fontSize: 8,
       textColor: textColor,
       cellPadding: { top: 5, bottom: 5, left: 4, right: 4 },
       minCellHeight: 11,
@@ -237,7 +237,7 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
         const rawProv = productos[data.row.index]?.proveedor
         if (!rawProv) return
         const color = provColor(rawProv)
-        doc.setFontSize(7)
+        doc.setFontSize(6.5)
         doc.setFont('helvetica', 'bold')
         // Truncate if badge would overflow cell
         const maxBw = data.cell.width - 6
