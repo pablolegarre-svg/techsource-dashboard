@@ -130,7 +130,10 @@ export default function Cotizar({ clienteSession }) {
             Para <strong>{guardada.nombre_cliente}</strong>
           </p>
           <p style={{ color: '#9aaabf', fontSize: '0.82rem', marginBottom: 24 }}>
-            ID {String(guardada.id).substring(0, 8)} · Te contactaremos a la brevedad.
+            ID {String(guardada.id).substring(0, 8)} · Te enviamos un correo con el resumen de tu cotización.
+          </p>
+          <p style={{ color: '#5b6f93', fontSize: '0.88rem', marginBottom: 16 }}>
+          Te enviamos un correo con el detalle completo para que puedas revisarlo.
           </p>
           {!guardada.precios_vigentes && (
             <div className="warning-card" style={{ marginBottom: 20, textAlign: 'center' }}>
@@ -325,8 +328,7 @@ export default function Cotizar({ clienteSession }) {
               {guardando ? 'Enviando...' : 'Solicitar Cotización'}
             </button>
             <p style={{ textAlign: 'center', fontSize: '0.75rem', color: '#9aaabf', margin: '8px 0 0' }}>
-              Te contactaremos a la brevedad.
-            </p>
+Te enviamos un correo con el detalle completo para que puedas revisarlo.            </p>
           </div>
         </aside>
 
