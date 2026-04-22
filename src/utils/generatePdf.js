@@ -216,6 +216,20 @@ export function generateCotizacionPdf(cotizacion, { isAdmin = false } = {}) {
           data.cell.styles.textColor = warnTitle
           data.cell.styles.fontStyle = 'bold'
         }
+        const colW = colStyles[data.column.index]?.cellWidth
+        if (colW) {
+          const availWidth = colW - 8
+          const text = Array.isArray(data.cell.text) ? data.cell.text.join('') : String(data.cell.text || '')
+          let fs = data.cell.styles.fontSize || 9
+          const fontStyle = data.cell.styles.fontStyle === 'bold' ? 'bold' : 'normal'
+          doc.setFont('helvetica', fontStyle)
+          doc.setFontSize(fs)
+          while (fs > 6 && doc.getTextWidth(text) > availWidth) {
+            fs -= 0.5
+            doc.setFontSize(fs)
+          }
+          data.cell.styles.fontSize = fs
+        }
       }
     },
     didDrawCell(data) {
