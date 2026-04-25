@@ -7,6 +7,7 @@ export default function LoginCliente({ onClienteLogin }) {
   const [email, setEmail]     = useState('')
   const [paso, setPaso]       = useState('email')
   const [cliente, setCliente] = useState(null)
+  const [codigo, setCodigo]   = useState('')
   const [loading, setLoading] = useState(false)
   const [error, setError]     = useState('')
 
@@ -21,19 +22,69 @@ export default function LoginCliente({ onClienteLogin }) {
       .ilike('email', email)
       .maybeSingle()
 
-    setLoading(false)
-
     if (queryError || !data) {
+      setLoading(false)
       setPaso('no-encontrado')
       return
     }
     if (data.activo === false) {
+      setLoading(false)
       setPaso('inactivo')
       return
     }
 
+    const response = await fetch('https://n8n.srv1164728.hstgr.cloud/webhook/techsource-otp-generar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: data.email }),
+    })
+
+    let payload
+    try {
+      payload = await response.json()
+    } catch {
+      payload = null
+    }
+
+    setLoading(false)
+
+    if (!response.ok || !payload?.ok) {
+      setError('No pudimos enviar el código. Intentá nuevamente.')
+      return
+    }
+
     setCliente(data)
-    setPaso('confirmar')
+    setCodigo('')
+    setPaso('otp')
+  }
+
+  async function handleOtp(e) {
+    e.preventDefault()
+    setError('')
+    setLoading(true)
+
+    const response = await fetch('https://n8n.srv1164728.hstgr.cloud/webhook/techsource-otp-verificar', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email: cliente?.email, codigo: codigo }),
+    })
+
+    let payload
+    try {
+      payload = await response.json()
+    } catch {
+      payload = null
+    }
+
+    setLoading(false)
+
+    if (response.ok && payload?.ok) {
+      onClienteLogin(cliente)
+      navigate('/mis-cotizaciones', { replace: true })
+      return
+    }
+
+    setError('Código incorrecto. Verificá los 6 dígitos y volvé a intentarlo.')
   }
 
   function entrarComoCliente() {
@@ -123,40 +174,56 @@ export default function LoginCliente({ onClienteLogin }) {
             </div>
           )}
 
-          {paso === 'confirmar' && cliente && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                background: '#f0f7ff', border: '1px solid #ccdeff',
-                borderRadius: 12, padding: '14px 16px',
-              }}>
+          {paso === 'otp' && cliente && (
+            <form className="login-form" onSubmit={handleOtp}>
+              <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
                 <div style={{
-                  width: 42, height: 42, borderRadius: '50%', background: '#2f6fed',
-                  color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 800, fontSize: '1.1rem', flexShrink: 0,
+                  display: 'flex', alignItems: 'center', gap: 14,
+                  background: '#f0f7ff', border: '1px solid #ccdeff',
+                  borderRadius: 12, padding: '14px 16px',
                 }}>
-                  {(cliente.nombre_completo || cliente.email)[0].toUpperCase()}
+                  <div style={{
+                    width: 42, height: 42, borderRadius: '50%', background: '#2f6fed',
+                    color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                    fontWeight: 800, fontSize: '1.1rem', flexShrink: 0,
+                  }}>
+                    {(cliente.nombre_completo || cliente.email)[0].toUpperCase()}
+                  </div>
+                  <div>
+                    <p style={{ margin: 0, fontWeight: 700, color: '#1d315d', fontSize: '0.95rem' }}>
+                      {cliente.nombre_completo}
+                    </p>
+                    <p style={{ margin: 0, fontSize: '0.82rem', color: '#6a7d9c' }}>{cliente.email}</p>
+                  </div>
                 </div>
-                <div>
-                  <p style={{ margin: 0, fontWeight: 700, color: '#1d315d', fontSize: '0.95rem' }}>
-                    {cliente.nombre_completo}
-                  </p>
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#6a7d9c' }}>{cliente.email}</p>
+
+                <div style={{ textAlign: 'center', color: '#5b6f93', fontSize: '0.92rem' }}>
+                  Te enviamos un código de 6 dígitos a tu correo. Ingresalo para completar el inicio de sesión.
                 </div>
+
+                <input
+                  type="text"
+                  inputMode="numeric"
+                  placeholder="Código de 6 dígitos"
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  required
+                  autoFocus
+                />
+
+                <button className="login-btn" type="submit" disabled={loading || codigo.length !== 6}>
+                  {loading ? 'Verificando...' : 'Verificar código'}
+                </button>
+
+                <button
+                  type="button"
+                  onClick={() => { setPaso('email'); setCliente(null); setCodigo(''); setError('') }}
+                  style={{ background: 'none', border: 'none', color: '#9aaabf', cursor: 'pointer', fontSize: '0.82rem' }}
+                >
+                  ← Cambiar correo
+                </button>
               </div>
-
-              <button className="login-btn" onClick={entrarComoCliente}>
-                Entrar como cliente
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { setPaso('email'); setCliente(null); setError('') }}
-                style={{ background: 'none', border: 'none', color: '#9aaabf', cursor: 'pointer', fontSize: '0.82rem' }}
-              >
-                ← Cambiar correo
-              </button>
-            </div>
+            </form>
           )}
 
         </div>
