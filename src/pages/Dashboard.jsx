@@ -2,32 +2,48 @@ import { useState, useEffect } from 'react'
 import { Link } from 'react-router-dom'
 import { supabase } from '../supabase'
 import LineChart from '../components/LineChart'
+import ErrorState from '../components/ErrorState'
 
 export default function Dashboard() {
   const [catalogo, setCatalogo] = useState([])
   const [historial, setHistorial] = useState([])
   const [cotizaciones, setCotizaciones] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
 
-  useEffect(() => {
-    async function cargar() {
-      const [{ data: cat }, { data: hist }, { data: cot }] = await Promise.all([
+  useEffect(() => { cargar() }, [])
+
+  async function cargar() {
+    setLoading(true)
+    setError(null)
+    try {
+      const [{ data: cat, error: e1 }, { data: hist, error: e2 }, { data: cot, error: e3 }] = await Promise.all([
         supabase.from('vista_catalogo_proveedores').select('*'),
         supabase.from('historial_precios').select('*').order('fecha_cambio', { ascending: false }),
-        supabase.from('vista_cotizaciones_clientes').select('*'),
+        supabase.from('cotizaciones_con_estado').select('*'),
       ])
+      if (e1 || e2 || e3) throw new Error((e1 || e2 || e3).message)
       setCatalogo(cat || [])
       setHistorial(hist || [])
       setCotizaciones(cot || [])
+    } catch (e) {
+      setError(e.message)
+    } finally {
       setLoading(false)
     }
-    cargar()
-  }, [])
+  }
 
   const vigentes   = catalogo.filter((x) => x.vigente).length
   const proveedores = [...new Set(catalogo.map((x) => x.proveedor).filter(Boolean))].length
-  const emitidas   = cotizaciones.filter((c) => c.estado === 'emitida').length
-  const aprobadas  = cotizaciones.filter((c) => c.estado === 'aprobada').length
+  function matchEstado(c, ...valores) {
+    const e = (c.estado || '').toLowerCase()
+    return valores.some((v) => e === v)
+  }
+  const emitidas   = cotizaciones.filter((c) => matchEstado(c, 'emitida')).length
+  const aprobadas  = cotizaciones.filter((c) => matchEstado(c, 'aprobada', 'aceptada')).length
+  const vencidas   = cotizaciones.filter((c) => matchEstado(c, 'vencida', 'expiró', 'expiro')).length
+  const rechazadas = cotizaciones.filter((c) => matchEstado(c, 'rechazada')).length
+  const enEspera   = cotizaciones.filter((c) => matchEstado(c, 'en_espera', 'en espera')).length
 
   const chartData = historial
     .slice(0, 12)
@@ -51,6 +67,8 @@ export default function Dashboard() {
     { to: '/cotizaciones',   icon: '🧾', label: 'Cotizaciones', desc: 'Gestión de solicitudes' },
     { to: '/clientes',       icon: '👥', label: 'Clientes',     desc: 'Base de clientes'       },
   ]
+
+  if (error) return <ErrorState mensaje={error} onRetry={cargar} />
 
   return (
     <div className="container" style={{ paddingTop: 8 }}>
@@ -147,15 +165,11 @@ export default function Dashboard() {
           <div className="card">
             <h2 style={{ marginBottom: 10 }}>Estado de cotizaciones</h2>
             <div style={{ display: 'flex', flexDirection: 'column', gap: 8 }}>
-              <EstadoBar label="Emitidas"  value={emitidas}  total={cotizaciones.length} color="#2f6fed" loading={loading} />
-              <EstadoBar label="Aprobadas" value={aprobadas} total={cotizaciones.length} color="#0ea472" loading={loading} />
-              <EstadoBar
-                label="Vencidas"
-                value={cotizaciones.filter((c) => c.estado === 'vencida').length}
-                total={cotizaciones.length}
-                color="#d97706"
-                loading={loading}
-              />
+              <EstadoBar label="Emitidas"   value={emitidas}   total={cotizaciones.length} color="#2f6fed" loading={loading} />
+              <EstadoBar label="En espera"  value={enEspera}   total={cotizaciones.length} color="#d97706" loading={loading} />
+              <EstadoBar label="Aprobadas"  value={aprobadas}  total={cotizaciones.length} color="#0ea472" loading={loading} />
+              <EstadoBar label="Rechazadas" value={rechazadas} total={cotizaciones.length} color="#e53e3e" loading={loading} />
+              <EstadoBar label="Vencidas"   value={vencidas}   total={cotizaciones.length} color="#94a3b8" loading={loading} />
             </div>
           </div>
         </div>

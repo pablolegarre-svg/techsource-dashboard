@@ -12,7 +12,7 @@ export default function ClientModal({ cliente = null, onClose, onSaved }) {
   const [error, setError] = useState('')
 
   function set(field, value) {
-    setForm((prev) => ({ ...prev, [field]: value }))
+    setForm((prev) => ({ ...prev, [field]: field === 'email' ? value.toLowerCase() : value }))
   }
 
   async function guardar() {

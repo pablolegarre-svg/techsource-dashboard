@@ -29,7 +29,7 @@ export default function AdminNavbar() {
 
   async function handleLogout() {
     await supabase.auth.signOut()
-    navigate('/catalogo', { replace: true })
+    setTimeout(() => navigate('/catalogo', { replace: true }), 2000)
   }
 
   const syncText = ultimaSync

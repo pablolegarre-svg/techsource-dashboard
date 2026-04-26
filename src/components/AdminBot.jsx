@@ -11,15 +11,17 @@ const SUGGS = [
 ]
 
 export default function AdminBot() {
-  const [abierto, setAbierto]     = useState(false)
-  const [mensajes, setMensajes]   = useState([])
-  const [historial, setHistorial] = useState([])
-  const [input, setInput]         = useState('')
-  const [cargando, setCargando]   = useState(false)
-  const [notif, setNotif]         = useState(false)
-  const [iniciado, setIniciado]   = useState(false)
-  const msgsRef  = useRef(null)
-  const inputRef = useRef(null)
+  const [abierto, setAbierto]       = useState(false)
+  const [mensajes, setMensajes]     = useState([])
+  const [historial, setHistorial]   = useState([])
+  const [input, setInput]           = useState('')
+  const [cargando, setCargando]     = useState(false)
+  const [notif, setNotif]           = useState(false)
+  const [iniciado, setIniciado]     = useState(false)
+  const [escuchando, setEscuchando] = useState(false)
+  const msgsRef        = useRef(null)
+  const inputRef       = useRef(null)
+  const reconocimiento = useRef(null)
 
   useEffect(() => {
     if (msgsRef.current) msgsRef.current.scrollTop = msgsRef.current.scrollHeight
@@ -95,6 +97,51 @@ export default function AdminBot() {
     setTimeout(() => inputRef.current?.focus(), 100)
   }
 
+  function toggleMic() {
+    if (!('webkitSpeechRecognition' in window) && !('SpeechRecognition' in window)) {
+      alert('Tu navegador no soporta reconocimiento de voz. Usá Chrome o Edge.')
+      return
+    }
+    if (escuchando) {
+      reconocimiento.current?.stop()
+    } else {
+      const SR = window.SpeechRecognition || window.webkitSpeechRecognition
+      const rec = new SR()
+      reconocimiento.current = rec
+      rec.lang = 'es-ES'
+      rec.continuous = false
+      rec.interimResults = true
+
+      rec.onstart = () => setEscuchando(true)
+
+      rec.onresult = (e) => {
+        const transcript = Array.from(e.results).map((r) => r[0].transcript).join('')
+        setInput(transcript)
+      }
+
+      rec.onend = () => {
+        setEscuchando(false)
+        setInput((val) => {
+          if (val.trim()) setTimeout(() => enviarDirecto(val.trim()), 300)
+          return val
+        })
+      }
+
+      rec.onerror = (e) => {
+        setEscuchando(false)
+        if (e.error === 'not-allowed') alert('Permiso de micrófono denegado. Activalo en la configuración del navegador.')
+      }
+
+      rec.start()
+    }
+  }
+
+  function enviarDirecto(texto) {
+    if (cargando || !texto) return
+    setInput('')
+    enviar(texto)
+  }
+
   const mostrarSuggs = mensajes.length <= 1
 
   return (
@@ -104,7 +151,7 @@ export default function AdminBot() {
         onClick={toggle}
         title="AdminBot — Asistente IA"
       >
-        <svg className="adminbot-fab-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round">
+        <svg className="adminbot-fab-icon" width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2">
           <path d="M21 15a2 2 0 01-2 2H7l-4 4V5a2 2 0 012-2h14a2 2 0 012 2z"/>
         </svg>
         <svg className="adminbot-fab-close" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
@@ -160,13 +207,25 @@ export default function AdminBot() {
             ref={inputRef}
             className="adminbot-input"
             type="text"
-            placeholder="Consulta datos del negocio..."
+            placeholder={escuchando ? 'Escuchando...' : 'Consulta datos del negocio...'}
             value={input}
             maxLength={500}
             disabled={cargando}
             onChange={(e) => setInput(e.target.value)}
             onKeyDown={(e) => { if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); enviar() } }}
           />
+          <button
+            className={`adminbot-mic${escuchando ? ' escuchando' : ''}`}
+            onClick={toggleMic}
+            title="Hablar"
+          >
+            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke={escuchando ? '#E74C3C' : '#64748b'} strokeWidth="2">
+              <path d="M12 1a3 3 0 0 0-3 3v8a3 3 0 0 0 6 0V4a3 3 0 0 0-3-3z"/>
+              <path d="M19 10v2a7 7 0 0 1-14 0v-2"/>
+              <line x1="12" y1="19" x2="12" y2="23"/>
+              <line x1="8" y1="23" x2="16" y2="23"/>
+            </svg>
+          </button>
           <button className="adminbot-send" onClick={() => enviar()} disabled={cargando || !input.trim()}>
             <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="white" strokeWidth="2.5">
               <line x1="22" y1="2" x2="11" y2="13"/>

@@ -4,26 +4,31 @@ import Table from '../components/Table'
 import Pagination, { paginate } from '../components/Pagination'
 import ClientModal from '../components/ClientModal'
 import { formatearFecha } from '../utils/helpers'
+import ErrorState from '../components/ErrorState'
 
 export default function Clientes() {
   const [clientes, setClientes] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [busqueda, setBusqueda] = useState('')
   const [modal, setModal] = useState(null)
   const [confirmando, setConfirmando] = useState(null)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
 
-  function cargar() {
+  async function cargar() {
     setLoading(true)
-    supabase
+    setError(null)
+    const { data, error: e } = await supabase
       .from('clientes')
       .select('*')
       .order('created_at', { ascending: false })
-      .then(({ data }) => { setClientes(data || []); setLoading(false) })
+    if (e) { setError(e.message); setLoading(false); return }
+    setClientes(data || [])
+    setLoading(false)
   }
 
-  useEffect(cargar, [])
+  useEffect(() => { cargar() }, [])
 
   async function confirmarToggle() {
     const cliente = confirmando
@@ -82,6 +87,8 @@ export default function Clientes() {
   ✏️
 </button>    )},
   ]
+
+  if (error) return <ErrorState mensaje={error} onRetry={cargar} />
 
   return (
     <div style={{ maxWidth: 1080, margin: '0 auto' }}>

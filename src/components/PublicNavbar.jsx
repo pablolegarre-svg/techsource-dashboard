@@ -21,10 +21,11 @@ export default function PublicNavbar({ session, clienteSession, onClienteLogout 
   async function handleLogout() {
     if (clienteSession) {
       onClienteLogout()
+      setTimeout(() => navigate('/catalogo', { replace: true }), 2000)
     } else {
       await supabase.auth.signOut()
+      setTimeout(() => navigate('/catalogo', { replace: true }), 2000)
     }
-    navigate('/catalogo', { replace: true })
   }
 
   const estaLogueado = !!clienteSession || !!session

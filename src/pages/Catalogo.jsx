@@ -3,10 +3,12 @@ import { supabase } from '../supabase'
 import Table from '../components/Table'
 import Pagination, { paginate } from '../components/Pagination'
 import { getUltimaSync } from '../utils/helpers'
+import ErrorState from '../components/ErrorState'
 
 export default function Catalogo() {
   const [catalogo, setCatalogo] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState('')
   const [proveedor, setProveedor] = useState('')
@@ -16,13 +18,19 @@ export default function Catalogo() {
   const [imgError, setImgError] = useState(false)
   const [confirmando, setConfirmando] = useState(null)
 
-  useEffect(() => {
-    supabase
+  useEffect(() => { cargar() }, [])
+
+  async function cargar() {
+    setLoading(true)
+    setError(null)
+    const { data, error: e } = await supabase
       .from('catalogo_proveedores')
       .select('*')
       .order('nombre', { ascending: true })
-      .then(({ data }) => { setCatalogo(data || []); setLoading(false) })
-  }, [])
+    if (e) { setError(e.message); setLoading(false); return }
+    setCatalogo(data || [])
+    setLoading(false)
+  }
 
   const categorias = useMemo(() => [...new Set(catalogo.map((x) => x.categoria).filter(Boolean))].sort(), [catalogo])
   const proveedores = useMemo(() => [...new Set(catalogo.map((x) => x.proveedor).filter(Boolean))].sort(), [catalogo])
@@ -85,6 +93,8 @@ export default function Catalogo() {
       ),
     },
   ]
+
+  if (error) return <ErrorState mensaje={error} onRetry={cargar} />
 
   return (
     <div style={{ maxWidth: 1400, margin: '0 auto' }}>

@@ -850,6 +850,15 @@ h2 {
 }
 .chat-send:hover { background: #2f6fed; }
 .chat-send:disabled { background: #cbd5e1; cursor: not-allowed; }
+.chat-mic {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: #F1F5F9; border: 1.5px solid #e2e8f0;
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: all .2s; flex-shrink: 0;
+}
+.chat-mic:hover { background: #EBF5FB; border-color: #3A8FC2; }
+.chat-mic.escuchando { background: #FDECEA; border-color: #E74C3C; animation: chat-mic-pulse .8s infinite; }
+@keyframes chat-mic-pulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.1)} }
 
 @media (max-width: 480px) {
   .chat-panel {
@@ -983,6 +992,15 @@ h2 {
 }
 .adminbot-send:hover { background: #3A8FC2; }
 .adminbot-send:disabled { background: #cbd5e1; cursor: not-allowed; }
+.adminbot-mic {
+  width: 38px; height: 38px; border-radius: 10px;
+  background: #F1F5F9; border: 1.5px solid #e2e8f0;
+  cursor: pointer; display: flex; align-items: center;
+  justify-content: center; transition: all .2s; flex-shrink: 0;
+}
+.adminbot-mic:hover { background: #EBF5FB; border-color: #3A8FC2; }
+.adminbot-mic.escuchando { background: #FDECEA; border-color: #E74C3C; animation: adminbot-mic-pulse .8s infinite; }
+@keyframes adminbot-mic-pulse { 0%,100%{transform:scale(1)}50%{transform:scale(1.1)} }
 
 @media (max-width: 480px) {
   .adminbot-panel {
@@ -2216,6 +2234,126 @@ h2 {
   padding: 24px;
   text-align: center;
   color: #6b7c98;
+}
+
+/* ERROR STATE */
+.error-state {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+  text-align: center;
+  gap: 8px;
+}
+.error-state-icon {
+  font-size: 2rem;
+  color: #E67E22;
+  margin-bottom: 4px;
+}
+.error-state-title {
+  margin: 0;
+  font-size: 1rem;
+  font-weight: 700;
+  color: #23395d;
+}
+.error-state-msg {
+  margin: 0;
+  font-size: 0.88rem;
+  color: #6b7c98;
+  max-width: 320px;
+}
+.error-state-btn {
+  margin-top: 8px;
+  padding: 8px 20px;
+  border-radius: 8px;
+  border: none;
+  background: #2f6fed;
+  color: #fff;
+  font-weight: 600;
+  font-size: 0.88rem;
+  cursor: pointer;
+  font-family: inherit;
+  transition: opacity 0.18s;
+}
+.error-state-btn:hover { opacity: 0.85; }
+
+/* SESSION EXPIRED TOAST */
+.session-toast {
+  position: fixed;
+  top: 20px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  background: #1a3461;
+  color: #fff;
+  padding: 12px 24px;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  font-weight: 500;
+  box-shadow: 0 8px 32px rgba(0,0,0,0.25);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  animation: toast-in 0.3s ease;
+}
+.session-toast-icon { font-size: 1.1rem; }
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(-50%) translateY(-12px); }
+  to   { opacity: 1; transform: translateX(-50%) translateY(0); }
+}
+
+/* SESSION CERRADA — OVERLAY CENTRADO */
+.session-cerrada-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 10001;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: rgba(10, 20, 50, 0.45);
+  backdrop-filter: blur(4px);
+  animation: overlay-in 0.25s ease;
+}
+.session-cerrada-card {
+  background: #fff;
+  border-radius: 16px;
+  padding: 40px 56px;
+  text-align: center;
+  box-shadow: 0 20px 60px rgba(0,0,0,0.2);
+  animation: card-in 0.3s ease;
+}
+.session-cerrada-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: #e8f5ee;
+  color: #177d48;
+  font-size: 1.6rem;
+  font-weight: 700;
+  margin-bottom: 16px;
+}
+.session-cerrada-titulo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: #1a3461;
+  margin: 0 0 6px;
+}
+.session-cerrada-sub {
+  font-size: 0.9rem;
+  color: #6b7c98;
+  margin: 0;
+}
+@keyframes overlay-in {
+  from { opacity: 0; }
+  to   { opacity: 1; }
+}
+@keyframes card-in {
+  from { opacity: 0; transform: scale(0.92); }
+  to   { opacity: 1; transform: scale(1); }
 }
 
 /* ═══════════════════════════════════════════

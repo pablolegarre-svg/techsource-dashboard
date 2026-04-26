@@ -9,18 +9,31 @@ import { generateCotizacionPdf } from '../utils/generatePdf'
 import { parseProductos } from './Cotizaciones'
 
 const ESTADO_BADGE = {
-  en_espera: 'badge-yellow',
-  emitida:   'badge-blue',
-  aprobada:  'badge-green',
-  rechazada: 'badge-red',
-  vencida:   'badge-gray',
+  en_espera:  'badge-yellow',
+  emitida:    'badge-blue',
+  aprobada:   'badge-green',
+  aceptada:   'badge-green',
+  rechazada:  'badge-red',
+  vencida:    'badge-red',
+  expiró:     'badge-red',
+  expiro:     'badge-red',
+  // valores capitalizados que puede devolver la vista
+  'En espera': 'badge-yellow',
+  'Emitida':   'badge-blue',
+  'Aprobada':  'badge-green',
+  'Aceptada':  'badge-green',
+  'Rechazada': 'badge-red',
+  'Vencida':   'badge-red',
+  'Expiró':    'badge-red',
 }
 const ESTADO_LABEL = {
-  en_espera: 'En espera',
-  emitida:   'Emitida',
-  aprobada:  'Aprobada',
-  rechazada: 'Rechazada',
-  vencida:   'Vencida',
+  en_espera:  'En espera',
+  emitida:    'Emitida',
+  aprobada:   'Aprobada',
+  aceptada:   'Aceptada',
+  rechazada:  'Rechazada',
+  vencida:    'Vencida',
+  expiró:     'Expiró',
 }
 
 export default function MisCotizaciones({ clienteSession }) {

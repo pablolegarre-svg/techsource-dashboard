@@ -189,7 +189,7 @@ export default function Cotizar({ clienteSession }) {
                 <div className="cotizar-field">
                   <label>EMAIL *</label>
                   <input className="input-filtro" placeholder="tu@email.com" type="email"
-                    value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value }))} />
+                    value={form.email} onChange={(e) => setForm((f) => ({ ...f, email: e.target.value.toLowerCase() }))} />
                 </div>
                 <div className="cotizar-field">
                   <label>TELÉFONO</label>

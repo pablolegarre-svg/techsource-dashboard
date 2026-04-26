@@ -1,14 +1,25 @@
-import { useState } from 'react'
+import { useState, useRef, useEffect } from 'react'
 import { Link, useNavigate } from 'react-router-dom'
 import { supabase } from '../supabase'
 
+
+
+const OTP_GENERAR_URL = import.meta.env.VITE_OTP_GENERAR_URL
+const OTP_VERIFICAR_URL = import.meta.env.VITE_OTP_VERIFICAR_URL
+
 export default function LoginCliente({ onClienteLogin }) {
   const navigate = useNavigate()
-  const [email, setEmail]     = useState('')
-  const [paso, setPaso]       = useState('email')
+  const [email, setEmail]   = useState('')
+  const [paso, setPaso]     = useState('email')
   const [cliente, setCliente] = useState(null)
+  const [codigo, setCodigo] = useState('')
   const [loading, setLoading] = useState(false)
-  const [error, setError]     = useState('')
+  const [error, setError]   = useState('')
+  const codigoRef = useRef(null)
+
+  useEffect(() => {
+    if (paso === 'otp') setTimeout(() => codigoRef.current?.focus(), 100)
+  }, [paso])
 
   async function handleEmail(e) {
     e.preventDefault()
@@ -21,24 +32,69 @@ export default function LoginCliente({ onClienteLogin }) {
       .ilike('email', email)
       .maybeSingle()
 
-    setLoading(false)
-
     if (queryError || !data) {
+      setLoading(false)
       setPaso('no-encontrado')
       return
     }
     if (data.activo === false) {
+      setLoading(false)
       setPaso('inactivo')
       return
     }
 
     setCliente(data)
-    setPaso('confirmar')
+
+    try {
+      await fetch(OTP_GENERAR_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: data.email }),
+      })
+    } catch {
+      setLoading(false)
+      setError('No se pudo enviar el código. Intentá de nuevo.')
+      return
+    }
+
+    setLoading(false)
+    setPaso('otp')
   }
 
-  function entrarComoCliente() {
-    onClienteLogin(cliente)
-    navigate('/mis-cotizaciones', { replace: true })
+  async function handleOtp(e) {
+    e.preventDefault()
+    if (codigo.length !== 6) return
+    setError('')
+    setLoading(true)
+
+    try {
+      const res = await fetch(OTP_VERIFICAR_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: cliente.email, codigo }),
+      })
+      const data = await res.json()
+
+      if (!data.ok) {
+        setError('Código incorrecto o expirado. Verificá e intentá de nuevo.')
+        setCodigo('')
+        setLoading(false)
+        return
+      }
+
+      onClienteLogin(cliente)
+      navigate('/mis-cotizaciones', { replace: true })
+    } catch {
+      setError('Error al verificar el código. Intentá de nuevo.')
+      setLoading(false)
+    }
+  }
+
+  function volverAlEmail() {
+    setPaso('email')
+    setCliente(null)
+    setCodigo('')
+    setError('')
   }
 
   return (
@@ -61,7 +117,7 @@ export default function LoginCliente({ onClienteLogin }) {
                 type="email"
                 placeholder="Tu correo electrónico"
                 value={email}
-                onChange={(e) => setEmail(e.target.value)}
+                onChange={(e) => setEmail(e.target.value.toLowerCase())}
                 required
                 autoComplete="email"
                 autoFocus
@@ -69,8 +125,61 @@ export default function LoginCliente({ onClienteLogin }) {
               <button className="login-btn" type="submit" disabled={loading}>
                 {loading ? 'Verificando...' : 'Continuar'}
               </button>
-              
             </form>
+          )}
+
+          {paso === 'otp' && cliente && (
+            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
+              <div style={{
+                display: 'flex', alignItems: 'center', gap: 14,
+                background: '#f0f7ff', border: '1px solid #ccdeff',
+                borderRadius: 12, padding: '14px 16px',
+              }}>
+                <div style={{
+                  width: 42, height: 42, borderRadius: '50%', background: '#2f6fed',
+                  color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  fontWeight: 800, fontSize: '1.1rem', flexShrink: 0,
+                }}>
+                  {(cliente.nombre_completo || cliente.email)[0].toUpperCase()}
+                </div>
+                <div>
+                  <p style={{ margin: 0, fontWeight: 700, color: '#1d315d', fontSize: '0.95rem' }}>
+                    {cliente.nombre_completo}
+                  </p>
+                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#6a7d9c' }}>{cliente.email}</p>
+                </div>
+              </div>
+
+              <p style={{ margin: 0, textAlign: 'center', fontSize: '0.88rem', color: '#4a5d7a', lineHeight: 1.5 }}>
+                Te enviamos un código de 6 dígitos a tu correo.<br />
+                Ingresalo para completar el inicio de sesión.
+              </p>
+
+              <form className="login-form" onSubmit={handleOtp}>
+                <input
+                  ref={codigoRef}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="\d{6}"
+                  placeholder="Código de 6 dígitos"
+                  value={codigo}
+                  onChange={(e) => setCodigo(e.target.value.replace(/\D/g, '').slice(0, 6))}
+                  required
+                  autoComplete="one-time-code"
+                />
+                <button className="login-btn" type="submit" disabled={loading || codigo.length !== 6}>
+                  {loading ? 'Verificando...' : 'Verificar código'}
+                </button>
+              </form>
+
+              <button
+                type="button"
+                onClick={volverAlEmail}
+                style={{ background: 'none', border: 'none', color: '#9aaabf', cursor: 'pointer', fontSize: '0.82rem' }}
+              >
+                ← Cambiar correo
+              </button>
+            </div>
           )}
 
           {paso === 'no-encontrado' && (
@@ -119,42 +228,6 @@ export default function LoginCliente({ onClienteLogin }) {
                 style={{ background: 'none', border: 'none', color: '#9aaabf', cursor: 'pointer', fontSize: '0.82rem' }}
               >
                 ← Volver
-              </button>
-            </div>
-          )}
-
-          {paso === 'confirmar' && cliente && (
-            <div style={{ display: 'flex', flexDirection: 'column', gap: 14 }}>
-              <div style={{
-                display: 'flex', alignItems: 'center', gap: 14,
-                background: '#f0f7ff', border: '1px solid #ccdeff',
-                borderRadius: 12, padding: '14px 16px',
-              }}>
-                <div style={{
-                  width: 42, height: 42, borderRadius: '50%', background: '#2f6fed',
-                  color: '#fff', display: 'flex', alignItems: 'center', justifyContent: 'center',
-                  fontWeight: 800, fontSize: '1.1rem', flexShrink: 0,
-                }}>
-                  {(cliente.nombre_completo || cliente.email)[0].toUpperCase()}
-                </div>
-                <div>
-                  <p style={{ margin: 0, fontWeight: 700, color: '#1d315d', fontSize: '0.95rem' }}>
-                    {cliente.nombre_completo}
-                  </p>
-                  <p style={{ margin: 0, fontSize: '0.82rem', color: '#6a7d9c' }}>{cliente.email}</p>
-                </div>
-              </div>
-
-              <button className="login-btn" onClick={entrarComoCliente}>
-                Entrar como cliente
-              </button>
-
-              <button
-                type="button"
-                onClick={() => { setPaso('email'); setCliente(null); setError('') }}
-                style={{ background: 'none', border: 'none', color: '#9aaabf', cursor: 'pointer', fontSize: '0.82rem' }}
-              >
-                ← Cambiar correo
               </button>
             </div>
           )}
