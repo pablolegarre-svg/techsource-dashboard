@@ -51,7 +51,7 @@ export default function PublicNavbar({ session, clienteSession, onClienteLogout 
         {ultimaSync && (
           <div className="sync-pill">
             <span className="sync-icon">◔</span>
-            <span>Última sync: {new Date(ultimaSync).toLocaleString()}</span>
+            <span>Última sincronización: {new Date(ultimaSync).toLocaleString()}</span>
           </div>
         )}
 
