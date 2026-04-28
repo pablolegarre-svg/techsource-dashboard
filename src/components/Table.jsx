@@ -17,7 +17,7 @@ export default function Table({ columns, data, loading, emptyMessage = 'No hay d
         <thead>
           <tr>
             {columns.map((col) => (
-              <th key={col.key}>{col.label}</th>
+              <th key={col.key} style={col.style}>{col.label}</th>
             ))}
           </tr>
         </thead>
@@ -29,7 +29,7 @@ export default function Table({ columns, data, loading, emptyMessage = 'No hay d
               style={onRowClick ? { cursor: 'pointer' } : undefined}
             >
               {columns.map((col) => (
-                <td key={col.key}>
+                <td key={col.key} style={col.style}>
                   {col.render ? col.render(row) : (row[col.key] ?? '')}
                 </td>
               ))}
