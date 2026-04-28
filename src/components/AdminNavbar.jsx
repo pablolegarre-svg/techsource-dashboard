@@ -9,6 +9,7 @@ const links = [
   { to: '/historial',      label: 'Historial' },
   { to: '/cotizaciones',   label: 'Cotizaciones' },
   { to: '/clientes',       label: 'Clientes' },
+  { to: '/destacados',    label: 'Destacados' },
 ]
 
 export default function AdminNavbar() {
