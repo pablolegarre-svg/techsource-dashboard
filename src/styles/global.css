@@ -384,7 +384,8 @@ body::before {
 .container {
   position: relative;
   z-index: 1;
-  width: min(1080px, calc(100% - 42px));
+  width: 95%;
+  max-width: 1400px;
   margin: 12px auto 24px;
 }
 
@@ -3376,20 +3377,22 @@ h2 {
   overflow: hidden;
   border-radius: 18px;
   margin-bottom: 16px;
-  min-height: 220px;
+  min-height: 90px;
   display: flex;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 14px;
   background:
-    linear-gradient(to right, rgba(10,22,60,0.92) 45%, rgba(10,22,60,0.30) 100%),
-    url('/assets/banner-catalogo.png') center right / cover no-repeat;
+    linear-gradient(to right, rgba(10,22,60,0.55) 35%, transparent 80%),
+    url('/banner-catalogo.png') right center/cover no-repeat;
   background-color: #0a1636;
-  padding: 36px 40px;
+  padding: 14px 28px;
 }
 
 .catalogo-banner-left {
   position: relative;
   z-index: 2;
-  max-width: 600px;
+  max-width: 68%;
   display: flex;
   flex-direction: column;
   gap: 14px;
@@ -3421,7 +3424,7 @@ h2 {
 
 .catalogo-banner-title {
   margin: 0;
-  font-size: clamp(1.5rem, 3vw, 2rem);
+  font-size: 1.4rem;
   font-weight: 800;
   color: #fff;
   letter-spacing: -0.03em;
@@ -3453,7 +3456,7 @@ h2 {
   left: 12px;
   top: 50%;
   transform: translateY(-50%);
-  color: rgba(255,255,255,0.5);
+  color: #8a9bb8;
   pointer-events: none;
   width: 16px;
   height: 16px;
@@ -3463,23 +3466,22 @@ h2 {
   width: 100%;
   padding: 9px 12px 9px 38px;
   border-radius: 10px;
-  border: 1.5px solid rgba(255,255,255,0.2);
-  background: rgba(255,255,255,0.1);
-  color: #fff;
+  border: 1.5px solid rgba(255,255,255,0.3);
+  background: #fff;
+  color: #1a3461;
   font-size: 0.85rem;
   font-family: inherit;
   outline: none;
-  transition: border-color 0.2s, background 0.2s;
-  backdrop-filter: blur(4px);
+  transition: border-color 0.2s;
 }
 
 .catalogo-search-input::placeholder {
-  color: rgba(255,255,255,0.45);
+  color: #8a9bb8;
 }
 
 .catalogo-search-input:focus {
-  border-color: rgba(255,255,255,0.5);
-  background: rgba(255,255,255,0.15);
+  border-color: rgba(255,255,255,0.7);
+  background: #fff;
 }
 
 .catalogo-search-btn {
@@ -3507,27 +3509,37 @@ h2 {
 /* CATEGORY PILLS IN BANNER */
 .catalogo-pills {
   display: flex;
-  flex-wrap: wrap;
+  flex-wrap: nowrap;
+  overflow-x: auto;
   gap: 6px;
+  width: 100%;
+  padding-right: 40%;
+  scrollbar-width: none;
+}
+
+.catalogo-pills::-webkit-scrollbar {
+  display: none;
 }
 
 .catalogo-pill {
-  padding: 5px 13px;
+  padding: 3px 8px;
   border-radius: 20px;
-  border: 1.5px solid rgba(255,255,255,0.22);
-  background: rgba(255,255,255,0.08);
-  color: rgba(255,255,255,0.8);
-  font-size: 0.78rem;
+  border: 1.5px solid rgba(255,255,255,0.35);
+  background: rgba(255,255,255,0.92);
+  color: #1a3461;
+  font-size: 0.68rem;
   font-weight: 600;
   cursor: pointer;
+  white-space: nowrap;
+  flex-shrink: 0;
   transition: background 0.15s, border-color 0.15s, color 0.15s;
   font-family: inherit;
 }
 
 .catalogo-pill:hover {
-  background: rgba(255,255,255,0.16);
-  color: #fff;
-  border-color: rgba(255,255,255,0.4);
+  background: #fff;
+  color: #2f6fed;
+  border-color: rgba(255,255,255,0.7);
 }
 
 .catalogo-pill.active {
@@ -3548,7 +3560,7 @@ h2 {
   background: rgba(255,255,255,0.88);
   border: 1px solid rgba(223,231,243,0.96);
   border-radius: 14px;
-  padding: 14px 16px;
+  padding: 6px 10px;
   display: flex;
   align-items: center;
   gap: 13px;
@@ -3556,8 +3568,8 @@ h2 {
 }
 
 .catalogo-stat-icon {
-  width: 42px;
-  height: 42px;
+  width: 32px;
+  height: 32px;
   border-radius: 10px;
   background: var(--primary-soft);
   display: flex;
@@ -3569,7 +3581,7 @@ h2 {
 
 .catalogo-stat-label {
   margin: 0 0 2px;
-  font-size: 0.72rem;
+  font-size: 0.65rem;
   font-weight: 600;
   text-transform: uppercase;
   letter-spacing: 0.06em;
@@ -3578,7 +3590,7 @@ h2 {
 
 .catalogo-stat-value {
   margin: 0 0 2px;
-  font-size: 1.45rem;
+  font-size: 1.1rem;
   font-weight: 800;
   color: #172b57;
   line-height: 1;
@@ -3597,19 +3609,18 @@ h2 {
 
 /* FEATURED PRODUCTS */
 .catalogo-featured {
-  margin-bottom: 16px;
+  margin-bottom: 4px;
   padding: 0;
   overflow: hidden;
 }
 
 .catalogo-featured .card-header {
-  padding: 14px 18px 12px;
-  border-bottom: 1px solid rgba(223,231,243,0.8);
+  padding: 8px 16px 4px;
 }
 
 .featured-scroll-wrap {
   overflow-x: auto;
-  padding: 14px 18px 18px;
+  padding: 6px 16px 10px;
   scrollbar-width: thin;
   scrollbar-color: #d0daf0 transparent;
 }
@@ -3628,14 +3639,17 @@ h2 {
 }
 
 .featured-scroll {
-  display: flex;
-  gap: 12px;
-  min-width: max-content;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(200px, 1fr));
+  gap: 10px;
 }
 
 .featured-card {
-  width: 200px;
   flex-shrink: 0;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  min-width: 220px;
   border: 1px solid rgba(223,231,243,0.96);
   border-radius: 12px;
   overflow: hidden;
@@ -3645,22 +3659,26 @@ h2 {
 }
 
 .featured-card:hover {
-  transform: translateY(-3px);
-  box-shadow: 0 8px 24px rgba(28,54,99,0.12);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 18px rgba(28,54,99,0.10);
   border-color: #b8cef0;
 }
 
 .featured-card-img {
-  width: 100%;
-  height: 120px;
+  width: 70px;
+  height: 70px;
+  flex-shrink: 0;
   object-fit: contain;
   background: #f4f7fc;
   display: block;
-  padding: 8px;
+  padding: 6px;
+  align-self: stretch;
 }
 
 .featured-card-body {
-  padding: 10px 12px 12px;
+  padding: 6px 8px;
+  flex: 1;
+  min-width: 0;
 }
 
 .featured-card-badge {
@@ -3676,8 +3694,9 @@ h2 {
   color: #172b57;
   line-height: 1.25;
   display: -webkit-box;
-  -webkit-line-clamp: 2;
+  -webkit-line-clamp: 1;
   -webkit-box-orient: vertical;
+  white-space: normal;
   overflow: hidden;
 }
 

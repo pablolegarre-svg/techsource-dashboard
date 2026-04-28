@@ -134,17 +134,18 @@ export default function CatalogoPublico() {
             </button>
           </div>
 
-          <div className="catalogo-pills">
-            {['', ...categorias].map(c => (
-              <button
-                key={c || '__todas'}
-                className={`catalogo-pill${categoria === c ? ' active' : ''}`}
-                onClick={() => { setCategoria(c); setPage(1) }}
-              >
-                {c ? (CAT_ICONS[c] ? CAT_ICONS[c] + ' ' : '') : '⊞ '}{c || 'Todos'}
-              </button>
-            ))}
-          </div>
+        </div>
+
+        <div className="catalogo-pills">
+          {['', ...categorias].map(c => (
+            <button
+              key={c || '__todas'}
+              className={`catalogo-pill${categoria === c ? ' active' : ''}`}
+              onClick={() => { setCategoria(c); setPage(1) }}
+            >
+              {c ? (CAT_ICONS[c] ? CAT_ICONS[c] + ' ' : '') : '⊞ '}{c || 'Todos'}
+            </button>
+          ))}
         </div>
       </section>
 
@@ -247,13 +248,7 @@ export default function CatalogoPublico() {
         <div className="catalogo-table-header">
           <h2 className="section-title" style={{ margin: 0 }}>Catálogo completo</h2>
           <div className="catalogo-table-actions">
-            <button className="btn-export">
-              <svg viewBox="0 0 20 20" fill="none" stroke="currentColor" strokeWidth="1.6" width="15" height="15">
-                <path d="M13 8l-3 3-3-3M10 11V3M4 14v2a1 1 0 001 1h10a1 1 0 001-1v-2" />
-              </svg>
-              Exportar
-            </button>
-            <select className="input-filtro select-sort" value={sortBy}
+<select className="input-filtro select-sort" value={sortBy}
               onChange={e => setSortBy(e.target.value)}>
               <option value="nombre">Ordenar por: Nombre (A-Z)</option>
               <option value="precio-asc">Precio (menor a mayor)</option>
