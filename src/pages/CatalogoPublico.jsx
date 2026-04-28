@@ -22,6 +22,7 @@ export default function CatalogoPublico() {
   const [seleccionado, setSeleccionado] = useState(null)
   const [imgError, setImgError] = useState(false)
   const [sortBy, setSortBy] = useState('nombre')
+  const [destacados, setDestacados] = useState([])
   const featuredRef = useRef(null)
 
   useEffect(() => {
@@ -31,6 +32,14 @@ export default function CatalogoPublico() {
       .eq('vigente', true)
       .order('nombre', { ascending: true })
       .then(({ data }) => { setCatalogo(data || []); setLoading(false) })
+  }, [])
+
+  useEffect(() => {
+    supabase
+      .from('productos_destacados')
+      .select('posicion,producto_id,sku,nombre,categoria,precio_venta,imagen_url')
+      .order('posicion')
+      .then(({ data }) => setDestacados(data || []))
   }, [])
 
   const categorias = useMemo(() =>
@@ -60,7 +69,6 @@ export default function CatalogoPublico() {
   }, [catalogo, busqueda, categoria, sortBy])
 
   const paginated = paginate(filtrado, page, pageSize)
-  const destacados = useMemo(() => catalogo.filter(p => p.imagen_url).slice(0, 4), [catalogo])
 
   const aplicar = () => { setBusqueda(inputVal); setPage(1) }
 
@@ -226,8 +234,8 @@ export default function CatalogoPublico() {
           <div className="featured-scroll-wrap">
             <div className="featured-scroll" ref={featuredRef}>
               {destacados.map(p => (
-                <div key={p.id} className="featured-card"
-                  onClick={() => { setSeleccionado(p); setImgError(false) }}>
+                <div key={p.posicion} className="featured-card"
+                  onClick={() => { setSeleccionado({ ...p, id: p.producto_id }); setImgError(false) }}>
                   <img src={p.imagen_url} alt={p.nombre} className="featured-card-img"
                     onError={e => { e.target.style.display = 'none' }} />
                   <div className="featured-card-body">

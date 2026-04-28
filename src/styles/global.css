@@ -3877,3 +3877,233 @@ h2 {
     align-items: flex-start;
   }
 }
+
+/* ═══════════════════════════════════════════
+   PÁGINA DESTACADOS (ADMIN)
+═══════════════════════════════════════════ */
+
+.destacados-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 16px;
+}
+
+.destacado-card {
+  background: rgba(255,255,255,0.88);
+  border: 1px solid rgba(223,231,243,0.96);
+  border-radius: 16px;
+  padding: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  box-shadow: var(--shadow-soft);
+}
+
+.destacado-card-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.destacado-pos-badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.06em;
+  color: #2f6fed;
+  background: #dce9ff;
+  padding: 3px 10px;
+  border-radius: 20px;
+}
+
+.destacado-producto-actual {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.destacado-img {
+  width: 56px;
+  height: 56px;
+  object-fit: contain;
+  border-radius: 8px;
+  background: #f4f7fc;
+  flex-shrink: 0;
+  padding: 4px;
+  border: 1px solid #eef3fb;
+}
+
+.destacado-img-placeholder {
+  width: 56px;
+  height: 56px;
+  border-radius: 8px;
+  background: #f4f7fc;
+  flex-shrink: 0;
+  border: 1px dashed #d0daf0;
+}
+
+.destacado-producto-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.destacado-nombre {
+  margin: 0 0 2px;
+  font-size: 0.82rem;
+  font-weight: 700;
+  color: #172b57;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.destacado-sku {
+  margin: 0 0 2px;
+  font-size: 0.72rem;
+  color: #8a9bb8;
+}
+
+.destacado-precio {
+  margin: 0;
+  font-size: 0.85rem;
+  font-weight: 800;
+  color: #2f6fed;
+}
+
+.destacado-vacio {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 16px 0;
+  color: #b0bccc;
+  font-size: 0.8rem;
+}
+
+.destacado-vacio p {
+  margin: 0;
+}
+
+.destacado-search-wrap {
+  position: relative;
+}
+
+.destacado-search-row {
+  display: flex;
+  align-items: center;
+  gap: 7px;
+  padding: 7px 10px;
+  border: 1.5px solid #dfe7f3;
+  border-radius: 10px;
+  background: #f8fafd;
+  transition: border-color 0.15s;
+}
+
+.destacado-search-row:focus-within {
+  border-color: #2f6fed;
+  background: #fff;
+}
+
+.destacado-search-input {
+  flex: 1;
+  border: none;
+  background: transparent;
+  font-size: 0.82rem;
+  color: #14213d;
+  font-family: inherit;
+  outline: none;
+}
+
+.destacado-search-input::placeholder {
+  color: #b0bccc;
+}
+
+.destacado-spinner {
+  width: 13px;
+  height: 13px;
+  border: 2px solid #dfe7f3;
+  border-top-color: #2f6fed;
+  border-radius: 50%;
+  animation: spin 0.6s linear infinite;
+  flex-shrink: 0;
+}
+
+@keyframes spin {
+  to { transform: rotate(360deg); }
+}
+
+.destacado-dropdown {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
+  background: #fff;
+  border: 1px solid #dfe7f3;
+  border-radius: 10px;
+  box-shadow: 0 8px 24px rgba(28,54,99,0.12);
+  list-style: none;
+  margin: 0;
+  padding: 4px;
+  z-index: 100;
+  max-height: 280px;
+  overflow-y: auto;
+}
+
+.destacado-dropdown-item {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+  padding: 7px 9px;
+  border-radius: 7px;
+  cursor: pointer;
+  transition: background 0.12s;
+}
+
+.destacado-dropdown-item:hover {
+  background: #f4f7fc;
+}
+
+.destacado-dropdown-img {
+  width: 32px;
+  height: 32px;
+  object-fit: contain;
+  border-radius: 5px;
+  background: #f4f7fc;
+  flex-shrink: 0;
+  padding: 2px;
+}
+
+.destacado-dropdown-info {
+  display: flex;
+  flex-direction: column;
+  min-width: 0;
+}
+
+.destacado-dropdown-nombre {
+  font-size: 0.82rem;
+  font-weight: 600;
+  color: #172b57;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.destacado-dropdown-meta {
+  font-size: 0.72rem;
+  color: #8a9bb8;
+}
+
+.destacado-guardando {
+  margin: 0;
+  font-size: 0.75rem;
+  color: #2f6fed;
+  text-align: center;
+}
+
+@media (max-width: 900px) {
+  .destacados-grid {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
