@@ -3334,7 +3334,7 @@ h2 {
   align-items: center;
   background:
     linear-gradient(to right, rgba(10,22,60,0.92) 45%, rgba(10,22,60,0.30) 100%),
-    url('/assets/banner-catalogo.png') center right / cover no-repeat;
+    url('/banner-catalogo.png') right center / cover no-repeat;
   background-color: #0a1636;
   padding: 36px 40px;
 }
