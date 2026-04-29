@@ -100,7 +100,8 @@ export default function Cotizar({ clienteSession }) {
     }
 
     try {
-      const res = await fetch(import.meta.env.VITE_N8N_WEBHOOK_COTIZACION, {
+      const webhookUrl = import.meta.env.VITE_N8N_WEBHOOK_COTIZACION || 'https://n8n.srv1164728.hstgr.cloud/webhook/generar-cotizacion'
+      const res = await fetch(webhookUrl, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
