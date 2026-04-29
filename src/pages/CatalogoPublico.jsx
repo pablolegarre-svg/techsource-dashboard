@@ -28,8 +28,7 @@ export default function CatalogoPublico() {
   useEffect(() => {
     supabase
       .from('vista_catalogo_proveedores')
-      .select('id,sku,nombre,descripcion,categoria,precio_venta,moneda,proveedor,stock,vigente,imagen_url,fecha_sync')
-      .eq('vigente', true)
+      .select('id,sku,nombre,descripcion,categoria,precio_venta,moneda,proveedor,stock_total,stock_disponible,vigente,imagen_url,fecha_sync')      .eq('vigente', true)
       .order('nombre', { ascending: true })
       .then(({ data }) => { setCatalogo(data || []); setLoading(false) })
   }, [])
@@ -91,8 +90,8 @@ export default function CatalogoPublico() {
     {
       key: 'stock', label: 'Disponibilidad',
       render: r => (
-        <span className={`badge ${r.stock > 0 ? 'badge-green' : 'badge-red'}`}>
-          {r.stock > 0 ? 'En stock' : 'Sin stock'}
+        <span className={`badge ${r.stock_disponible > 0 ? 'badge-green' : 'badge-red'}`}>
+          {r.stock_disponible > 0 ? 'En stock' : 'Sin stock'}
         </span>
       )
     },
