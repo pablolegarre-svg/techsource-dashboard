@@ -129,12 +129,21 @@ export default function NuevaCotizacion() {
 
       if (!res.ok) {
         const errData = await res.json().catch(() => ({}))
-        alert(errData.message || `Error al generar la cotización (código ${res.status}). Intentá de nuevo.`)
+        if (res.status === 409) {
+          alert(errData.message || 'Stock insuficiente para uno o más productos de la cotización.')
+        } else {
+          alert(errData.message || `Error al generar la cotización (código ${res.status}). Intentá de nuevo.`)
+        }
         setGuardando(false)
         return
       }
 
       const data = await res.json().catch(() => ({}))
+      if (data.ok === false) {
+        alert(data.error || 'Error al generar la cotización.')
+        setGuardando(false)
+        return
+      }
       setGuardada(data?.id ? data : { ...payload, id: data?.id ?? crypto.randomUUID() })
     } catch (err) {
       console.error(err)
@@ -251,8 +260,11 @@ export default function NuevaCotizacion() {
             >
               <option value="">Seleccionar producto</option>
               {productosFiltrados.map((p) => (
-                <option key={p.id} value={p.id}>
-                  {p.nombre} — ${Number(p.precio_venta).toFixed(0)} {p.moneda || ''}
+                <option key={p.id} value={p.id} disabled={(p.stock_disponible ?? 0) === 0}>
+                  {p.nombre} — ${Number(p.precio_venta).toFixed(0)} {p.moneda || ''}{' '}
+                  {(p.stock_disponible ?? 0) === 0
+                    ? '(Sin stock)'
+                    : `(${p.stock_disponible} disp.)`}
                 </option>
               ))}
             </select>

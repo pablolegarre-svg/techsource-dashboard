@@ -36,6 +36,10 @@ export default function Cotizar({ clienteSession }) {
   )
 
   function agregar(producto) {
+    if ((producto.stock_disponible ?? 0) <= 0) {
+      alert('Sin stock disponible para este producto')
+      return
+    }
     setCarrito((prev) => {
       const ex = prev.find((p) => String(p.producto_id) === String(producto.id))
       if (ex) return prev.map((p) =>
@@ -101,7 +105,22 @@ export default function Cotizar({ clienteSession }) {
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload),
       })
-      if (!res.ok) throw new Error('Error del servidor')
+      if (!res.ok) {
+        const errData = await res.json().catch(() => ({}))
+        if (res.status === 409) {
+          alert(errData.message || 'Stock insuficiente para uno o más productos de la cotización.')
+        } else {
+          alert(errData.message || 'Error al enviar la cotización. Intentá de nuevo.')
+        }
+        setGuardando(false)
+        return
+      }
+      const resData = await res.json().catch(() => ({}))
+      if (resData.ok === false) {
+        alert(resData.error || 'Error al enviar la cotización.')
+        setGuardando(false)
+        return
+      }
       // N8N responde 200 sin body — construimos el estado de éxito con los datos locales
       setGuardada({
         nombre_cliente: nombreCliente,
@@ -239,6 +258,8 @@ export default function Cotizar({ clienteSession }) {
                         
                         {enCarrito ? (
                           <span style={{ fontSize: '0.85rem', color: '#0ea472', fontWeight: 600, padding: '4px 8px' }}>✓ Agregado</span>
+                        ) : p.stock_disponible === 0 ? (
+                          <button className="product-inline-add" disabled style={{ opacity: 0.45, cursor: 'not-allowed' }}>Sin stock</button>
                         ) : (
                           <button className="product-inline-add" onClick={(e) => { e.stopPropagation(); agregar(p) }}>+ Agregar</button>
                         )}
