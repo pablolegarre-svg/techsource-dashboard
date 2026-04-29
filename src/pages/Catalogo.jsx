@@ -2,11 +2,12 @@ import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../supabase'
 import Table from '../components/Table'
 import Pagination, { paginate } from '../components/Pagination'
-import { getUltimaSync } from '../utils/helpers'
+import ErrorState from '../components/ErrorState'
 
 export default function Catalogo() {
   const [catalogo, setCatalogo] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState('')
   const [proveedor, setProveedor] = useState('')
@@ -16,13 +17,28 @@ export default function Catalogo() {
   const [imgError, setImgError] = useState(false)
   const [confirmando, setConfirmando] = useState(null)
 
-  useEffect(() => {
-    supabase
-      .from('catalogo_proveedores')
-      .select('*')
-      .order('nombre', { ascending: true })
-      .then(({ data }) => { setCatalogo(data || []); setLoading(false) })
-  }, [])
+  useEffect(() => { cargar() }, [])
+
+  async function cargar() {
+    setLoading(true)
+    setError(null)
+    const [{ data: productos, error: e1 }, { data: reservas }] = await Promise.all([
+      supabase.from('catalogo_proveedores').select('*').order('nombre', { ascending: true }),
+      supabase.from('stock_control').select('catalogo_id, stock_reservado').then((r) => r.error ? { data: [] } : r),
+    ])
+    if (e1) { setError(e1.message); setLoading(false); return }
+    const reservasPorProducto = {}
+    for (const r of (reservas || [])) {
+      const key = String(r.catalogo_id)
+      reservasPorProducto[key] = (reservasPorProducto[key] || 0) + r.stock_reservado
+    }
+    const merged = (productos || []).map((p) => {
+      const reservado = reservasPorProducto[String(p.id)] || 0
+      return { ...p, stock_reservado: reservado, stock_disponible: p.stock - reservado }
+    })
+    setCatalogo(merged)
+    setLoading(false)
+  }
 
   const categorias = useMemo(() => [...new Set(catalogo.map((x) => x.categoria).filter(Boolean))].sort(), [catalogo])
   const proveedores = useMemo(() => [...new Set(catalogo.map((x) => x.proveedor).filter(Boolean))].sort(), [catalogo])
@@ -60,10 +76,20 @@ export default function Catalogo() {
     { key: 'sku', label: 'SKU' },
     { key: 'nombre', label: 'Nombre' },
     { key: 'categoria', label: 'Categoría', render: (r) => <span className="badge badge-blue-soft">{r.categoria}</span> },
-    { key: 'precio', label: 'Precio costo', render: (r) => `${(r.moneda ?? '')} ${r.precio.toFixed(0) ?? ''}` },
-    { key: 'precio_venta', label: 'Precio venta', render: (r) => ` ${(r.moneda ?? '')} ${r.precio_venta.toFixed(0) ?? ''} ` },
+    { key: 'precio', label: 'Precio costo', render: (r) => `${r.moneda ?? ''} ${r.precio != null ? Number(r.precio).toFixed(0) : '—'}` },
+    { key: 'precio_venta', label: 'Precio venta', render: (r) => `${r.moneda ?? ''} ${r.precio_venta != null ? Number(r.precio_venta).toFixed(0) : '—'}` },
     { key: 'proveedor', label: 'Proveedor' },
-    { key: 'stock', label: 'Stock', render: (r) => <span style={{ display: 'block', textAlign: 'center' }}>{r.stock}</span> },
+    { key: 'stock', label: 'Stock Total', render: (r) => <span style={{ display: 'block', textAlign: 'center' }}>{r.stock}</span> },
+    { key: 'stock_reservado', label: 'Reservado', render: (r) => (
+      <span style={{ display: 'block', textAlign: 'center', color: r.stock_reservado > 0 ? '#b42318' : '#9aaabf' }}>
+        {r.stock_reservado}
+      </span>
+    )},
+    { key: 'stock_disponible', label: 'Disponible', render: (r) => (
+      <span style={{ display: 'block', textAlign: 'center', fontWeight: 600, color: r.stock_disponible > 0 ? '#177d48' : '#b42318' }}>
+        {r.stock_disponible}
+      </span>
+    )},
     { key: 'fecha_sync', label: 'Última Sync', render: (r) => r.fecha_sync ? new Date(r.fecha_sync).toLocaleString() : '' },
     {
       key: 'vigente', label: 'Vigente',
@@ -85,6 +111,8 @@ export default function Catalogo() {
       ),
     },
   ]
+
+  if (error) return <ErrorState mensaje={error} onRetry={cargar} />
 
   return (
     <div style={{ maxWidth: 1400, margin: '0 auto' }}>
@@ -154,8 +182,20 @@ export default function Catalogo() {
                   <strong>{seleccionado.moneda} {Number(seleccionado.precio_venta).toLocaleString()}</strong>
                 </div>
                 <div className="prod-admin-modal-row">
-                  <span>Stock</span>
+                  <span>Stock total</span>
                   <strong>{seleccionado.stock} unidades</strong>
+                </div>
+                <div className="prod-admin-modal-row">
+                  <span>Reservado</span>
+                  <strong style={{ color: seleccionado.stock_reservado > 0 ? '#b42318' : '#6b7c98' }}>
+                    {seleccionado.stock_reservado || 0} unidades
+                  </strong>
+                </div>
+                <div className="prod-admin-modal-row">
+                  <span>Disponible</span>
+                  <strong style={{ color: seleccionado.stock_disponible > 0 ? '#177d48' : '#b42318' }}>
+                    {seleccionado.stock_disponible ?? seleccionado.stock} unidades
+                  </strong>
                 </div>
                 <div className="prod-admin-modal-row">
                   <span>Proveedor</span>

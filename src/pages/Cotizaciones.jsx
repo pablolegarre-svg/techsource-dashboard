@@ -1,5 +1,6 @@
 import { useState, useEffect, useMemo } from 'react'
 import { supabase } from '../supabase'
+import ErrorState from '../components/ErrorState'
 import Table from '../components/Table'
 import Modal from '../components/Modal'
 import Pagination, { paginate } from '../components/Pagination'
@@ -25,7 +26,7 @@ const ESTADOS = [
   { value: 'en_espera', label: 'En espera', badge: 'badge-yellow' },
   { value: 'emitida',   label: 'Emitida',   badge: 'badge-blue'   },
   { value: 'aprobada',  label: 'Aprobada',  badge: 'badge-green'  },
-  { value: 'vencida',   label: 'Vencida',   badge: 'badge-gray'   },
+  { value: 'vencida',   label: 'Vencida',   badge: 'badge-red'    },
 ]
 
 // Todos los estados posibles (incluyendo rechazada, que solo puede setear el cliente)
@@ -52,16 +53,21 @@ export default function Cotizaciones() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
 
-  function cargar() {
+  const [error, setError] = useState(null)
+
+  async function cargar() {
     setLoading(true)
-    supabase
+    setError(null)
+    const { data, error: e } = await supabase
       .from('cotizaciones_con_estado')
       .select('*')
       .order('fecha_creacion', { ascending: false })
-      .then(({ data }) => { setCotizaciones(data || []); setLoading(false) })
+    if (e) { setError(e.message); setLoading(false); return }
+    setCotizaciones(data || [])
+    setLoading(false)
   }
 
-  useEffect(cargar, [])
+  useEffect(() => { cargar() }, [])
 
   async function cambiarEstado(id, nuevoEstado) {
     await supabase.from('cotizaciones').update({ estado: nuevoEstado }).eq('id', id)
@@ -122,6 +128,8 @@ export default function Cotizaciones() {
       </div>
     )},
   ]
+
+  if (error) return <ErrorState mensaje={error} onRetry={cargar} />
 
   return (
     <div style={{ maxWidth: 1080, margin: '0 auto' }}>

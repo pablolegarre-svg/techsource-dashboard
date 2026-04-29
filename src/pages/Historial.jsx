@@ -3,11 +3,13 @@ import { supabase } from '../supabase'
 import LineChart from '../components/LineChart'
 import Table from '../components/Table'
 import Pagination, { paginate } from '../components/Pagination'
+import ErrorState from '../components/ErrorState'
 
 export default function Historial() {
   const [historial, setHistorial] = useState([])
   const [catalogo, setCatalogo] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [busqueda, setBusqueda] = useState('')
   const [categoria, setCategoria] = useState('')
   const [producto, setProducto] = useState('')
@@ -15,16 +17,20 @@ export default function Historial() {
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
 
-  useEffect(() => {
-    Promise.all([
+  useEffect(() => { cargar() }, [])
+
+  async function cargar() {
+    setLoading(true)
+    setError(null)
+    const [{ data: hist, error: e1 }, { data: cat, error: e2 }] = await Promise.all([
       supabase.from('historial_precios').select('*').order('fecha_cambio', { ascending: true }),
       supabase.from('vista_catalogo_proveedores').select('sku,nombre,categoria,proveedor,source,fecha_sync'),
-    ]).then(([{ data: hist }, { data: cat }]) => {
-      setHistorial(hist || [])
-      setCatalogo(cat || [])
-      setLoading(false)
-    })
-  }, [])
+    ])
+    if (e1 || e2) { setError((e1 || e2).message); setLoading(false); return }
+    setHistorial(hist || [])
+    setCatalogo(cat || [])
+    setLoading(false)
+  }
 
   const categorias = useMemo(() => [...new Set(catalogo.map((x) => x.categoria).filter(Boolean))].sort(), [catalogo])
   const productos = useMemo(() => [...new Set(historial.map((x) => x.nombre).filter(Boolean))].sort(), [historial])
@@ -135,6 +141,8 @@ export default function Historial() {
       render: (r) => (r.fecha_cambio ? new Date(r.fecha_cambio).toLocaleString('es-CO') : ''),
     },
   ]
+
+  if (error) return <ErrorState mensaje={error} onRetry={cargar} />
 
   return (
     <div style={{ maxWidth: 1080, margin: '0 auto' }}>

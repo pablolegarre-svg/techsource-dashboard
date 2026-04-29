@@ -9,25 +9,43 @@ import { generateCotizacionPdf } from '../utils/generatePdf'
 import { parseProductos } from './Cotizaciones'
 
 const ESTADO_BADGE = {
-  en_espera: 'badge-yellow',
-  emitida:   'badge-blue',
-  aprobada:  'badge-green',
-  rechazada: 'badge-red',
-  vencida:   'badge-gray',
+  en_espera:  'badge-yellow',
+  emitida:    'badge-blue',
+  aprobada:   'badge-green',
+  aceptada:   'badge-green',
+  rechazada:  'badge-red',
+  vencida:    'badge-red',
+  expiró:     'badge-red',
+  expiro:     'badge-red',
+  // valores capitalizados que puede devolver la vista
+  'En espera': 'badge-yellow',
+  'Emitida':   'badge-blue',
+  'Aprobada':  'badge-green',
+  'Aceptada':  'badge-green',
+  'Rechazada': 'badge-red',
+  'Vencida':   'badge-red',
+  'Expiró':    'badge-red',
 }
 const ESTADO_LABEL = {
-  en_espera: 'En espera',
-  emitida:   'Emitida',
-  aprobada:  'Aprobada',
-  rechazada: 'Rechazada',
-  vencida:   'Vencida',
+  en_espera:  'En espera',
+  emitida:    'Emitida',
+  aprobada:   'Aprobada',
+  aceptada:   'Aceptada',
+  rechazada:  'Rechazada',
+  vencida:    'Vencida',
+  expiró:     'Expiró',
 }
+
+const ESTADOS_VENCIDA = new Set(['vencida', 'expiró', 'expiro', 'Vencida', 'Expiró'])
+
+const N8N_RECOTIZAR = 'https://n8n.srv1164728.hstgr.cloud/webhook/re-cotizar'
 
 export default function MisCotizaciones({ clienteSession }) {
   const [cotizaciones, setCotizaciones] = useState([])
   const [loading, setLoading] = useState(true)
   const [detalle, setDetalle] = useState(null)
-  // const [confirmando, setConfirmando] = useState(null) // deshabilitado: aceptar/rechazar se hace desde el email (N8N)
+  const [recotizando, setRecotizando] = useState(null)
+  const [recotizacionMsg, setRecotizacionMsg] = useState(null)
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(10)
 
@@ -51,6 +69,35 @@ export default function MisCotizaciones({ clienteSession }) {
   //   if (detalle?.id === id) setDetalle((prev) => ({ ...prev, estado: nuevoEstado }))
   // }
 
+  async function recotizar(cotizacion) {
+    setRecotizando(cotizacion.id)
+    setRecotizacionMsg(null)
+    try {
+      const res = await fetch(N8N_RECOTIZAR, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          cotizacion_id: cotizacion.id,
+          cliente_id: clienteSession?.id,
+        }),
+      })
+      if (!res.ok) throw new Error('Error en el servidor')
+      setRecotizacionMsg({ tipo: 'ok', texto: 'Re-cotización enviada. En breve recibirás un email con los precios actualizados.' })
+      // refresca la lista para mostrar la nueva cotización
+      const { data } = await supabase
+        .from('vista_cotizaciones_clientes')
+        .select('*')
+        .ilike('email_cliente', clienteSession?.email)
+        .order('fecha_creacion', { ascending: false })
+      setCotizaciones(data || [])
+      setPage(1)
+    } catch {
+      setRecotizacionMsg({ tipo: 'error', texto: 'No se pudo procesar la re-cotización. Intentá de nuevo más tarde.' })
+    } finally {
+      setRecotizando(null)
+    }
+  }
+
   const paginated = paginate(cotizaciones, page, pageSize)
 
   const columns = [
@@ -62,15 +109,20 @@ export default function MisCotizaciones({ clienteSession }) {
         {ESTADO_LABEL[r.estado] || r.estado}
       </span>
     )},
-    { key: 'acciones', label: '', render: (r) => (
-      <div style={{ display: 'flex', gap: 6, alignItems: 'center' }}>
-        {/* Botones aceptar/rechazar deshabilitados — el cliente gestiona desde el email (N8N)
-        {r.estado === 'emitida' && (
-          <>
-            <button className="btn-icon" title="Aceptar" style={{ color: '#2da66b' }} onClick={() => setConfirmando({ cotizacion: r, accion: 'aprobada' })}>✓</button>
-            <button className="btn-icon" title="Rechazar" style={{ color: '#E74C3C' }} onClick={() => setConfirmando({ cotizacion: r, accion: 'rechazada' })}>✕</button>
-          </>
-        )} */}
+    { key: 'acciones', label: '', style: { width: 200, textAlign: 'right' }, render: (r) => (
+      <div style={{ display: 'flex', gap: 6, alignItems: 'center', justifyContent: 'flex-end' }}>
+        {ESTADOS_VENCIDA.has(r.estado) ? (
+          <button
+            className="btn-recotizar"
+            title="Re-cotizar con precios actualizados"
+            disabled={recotizando === r.id}
+            onClick={() => recotizar(r)}
+          >
+            {recotizando === r.id ? 'Enviando...' : '↻ Re-cotizar'}
+          </button>
+        ) : (
+          <span style={{ display: 'inline-block', width: 106 }} />
+        )}
         <button className="btn-icon" title="Ver" onClick={() => setDetalle(r)}>👁</button>
         <button className="btn-icon" title="PDF" onClick={() => generateCotizacionPdf(r)}>⬇</button>
       </div>
@@ -84,6 +136,16 @@ export default function MisCotizaciones({ clienteSession }) {
         <p className="page-subtitle">{cotizaciones.length} cotización(es) registradas</p>
         <Link to="/cotizar" className="btn-cotizar-mobile">+ Solicitar Cotización</Link>
       </section>
+
+      {recotizacionMsg && (
+        <section
+          className={`card recotizacion-msg recotizacion-msg--${recotizacionMsg.tipo}`}
+          style={{ marginBottom: 14 }}
+        >
+          <p style={{ margin: 0 }}>{recotizacionMsg.texto}</p>
+          <button className="btn-icon" style={{ marginLeft: 8 }} onClick={() => setRecotizacionMsg(null)}>✕</button>
+        </section>
+      )}
 
       <section className="card">
         <Table columns={columns} data={paginated} loading={loading} emptyMessage="Todavía no tenés cotizaciones." />

@@ -3,27 +3,31 @@ import { supabase } from '../supabase'
 import Table from '../components/Table'
 import Pagination, { paginate } from '../components/Pagination'
 import { formatearFecha } from '../utils/helpers'
+import ErrorState from '../components/ErrorState'
 
 export default function Proveedores() {
   const [proveedores, setProveedores] = useState([])
   const [catalogo, setCatalogo] = useState([])
   const [loading, setLoading] = useState(true)
+  const [error, setError] = useState(null)
   const [busqueda, setBusqueda] = useState('')
   const [page, setPage] = useState(1)
   const [pageSize, setPageSize] = useState(25)
 
-  useEffect(() => {
-    async function cargar() {
-      const [{ data: prov }, { data: cat }] = await Promise.all([
-        supabase.from('proveedores').select('*').order('nombre', { ascending: true }),
-        supabase.from('vista_catalogo_proveedores').select('idproveedor, vigente'),
-      ])
-      setProveedores(prov || [])
-      setCatalogo(cat || [])
-      setLoading(false)
-    }
-    cargar()
-  }, [])
+  useEffect(() => { cargar() }, [])
+
+  async function cargar() {
+    setLoading(true)
+    setError(null)
+    const [{ data: prov, error: e1 }, { data: cat, error: e2 }] = await Promise.all([
+      supabase.from('proveedores').select('*').order('nombre', { ascending: true }),
+      supabase.from('vista_catalogo_proveedores').select('idproveedor, vigente'),
+    ])
+    if (e1 || e2) { setError((e1 || e2).message); setLoading(false); return }
+    setProveedores(prov || [])
+    setCatalogo(cat || [])
+    setLoading(false)
+  }
 
   const filtrados = useMemo(() => {
     if (!busqueda.trim()) return proveedores
@@ -80,6 +84,8 @@ export default function Proveedores() {
       render: (r) => <span style={{ fontSize: '0.83rem', color: '#9aaabf' }}>{formatearFecha(r.creado)}</span>,
     },
   ]
+
+  if (error) return <ErrorState mensaje={error} onRetry={cargar} />
 
   return (
     <main className="container">

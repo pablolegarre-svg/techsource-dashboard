@@ -21,10 +21,11 @@ export default function PublicNavbar({ session, clienteSession, onClienteLogout 
   async function handleLogout() {
     if (clienteSession) {
       onClienteLogout()
+      setTimeout(() => navigate('/catalogo', { replace: true }), 2000)
     } else {
       await supabase.auth.signOut()
+      setTimeout(() => navigate('/catalogo', { replace: true }), 2000)
     }
-    navigate('/catalogo', { replace: true })
   }
 
   const estaLogueado = !!clienteSession || !!session
@@ -50,7 +51,7 @@ export default function PublicNavbar({ session, clienteSession, onClienteLogout 
         {ultimaSync && (
           <div className="sync-pill">
             <span className="sync-icon">◔</span>
-            <span>Última sync: {new Date(ultimaSync).toLocaleString()}</span>
+            <span>Última sincronización: {new Date(ultimaSync).toLocaleString()}</span>
           </div>
         )}
 

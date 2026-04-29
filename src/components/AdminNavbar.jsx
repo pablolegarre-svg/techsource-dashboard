@@ -9,6 +9,7 @@ const links = [
   { to: '/historial',      label: 'Historial' },
   { to: '/cotizaciones',   label: 'Cotizaciones' },
   { to: '/clientes',       label: 'Clientes' },
+  { to: '/destacados',    label: 'Destacados' },
 ]
 
 export default function AdminNavbar() {
@@ -29,7 +30,7 @@ export default function AdminNavbar() {
 
   async function handleLogout() {
     await supabase.auth.signOut()
-    navigate('/catalogo', { replace: true })
+    setTimeout(() => navigate('/catalogo', { replace: true }), 2000)
   }
 
   const syncText = ultimaSync

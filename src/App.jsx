@@ -17,8 +17,10 @@ import Historial from './pages/Historial'
 import Cotizaciones from './pages/Cotizaciones'
 import MisCotizaciones from './pages/MisCotizaciones'
 import Cotizar from './pages/Cotizar'
+import Checkout from './pages/Checkout'
 import Clientes from './pages/Clientes'
 import Proveedores from './pages/Proveedores'
+import Destacados from './pages/Destacados'
 
 // ─── Layouts ────────────────────────────────────────────────────────────────
 
@@ -77,6 +79,8 @@ export default function App() {
   const [session, setSession]               = useState(undefined)
   const [adminVerificado, setAdminVerificado] = useState(undefined)
   const [clienteSession, setClienteSession] = useState(loadClienteSession)
+  const [sessionExpirada, setSessionExpirada] = useState(false)
+  const [sessionCerrada, setSessionCerrada]   = useState(false)
 
   // Consulta la tabla user_roles para saber si el usuario es admin
   async function checkAdminRole(userId) {
@@ -91,25 +95,34 @@ export default function App() {
   }
 
   useEffect(() => {
-    supabase.auth.getSession().then(({ data }) => {
+    supabase.auth.getSession().then(({ data, error }) => {
       const s = data.session ?? null
       setSession(s)
       if (s) {
         checkAdminRole(s.user.id)
       } else {
         setAdminVerificado(false)
+        if (error) {
+          setSessionExpirada(true)
+          setTimeout(() => setSessionExpirada(false), 5000)
+        }
       }
     })
 
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, newSession) => {
+    const { data: { subscription } } = supabase.auth.onAuthStateChange((event, newSession) => {
       const s = newSession ?? null
       setSession(s)
       if (s) {
         checkAdminRole(s.user.id)
-        // Si es admin, limpiar clienteSession
-        // (se resolverá cuando checkAdminRole setee adminVerificado)
       } else {
         setAdminVerificado(false)
+        if (event === 'SIGNED_OUT') {
+          setSessionCerrada(true)
+          setTimeout(() => setSessionCerrada(false), 3000)
+        } else if (event === 'TOKEN_REFRESHED') {
+          setSessionExpirada(true)
+          setTimeout(() => setSessionExpirada(false), 5000)
+        }
       }
     })
 
@@ -132,12 +145,30 @@ export default function App() {
   function handleClienteLogout() {
     sessionStorage.removeItem('ts_cliente')
     setClienteSession(null)
+    setSessionCerrada(true)
+    setTimeout(() => setSessionCerrada(false), 3000)
   }
 
   // Login solo se bloquea si ya hay sesión admin confirmada
   const loginBloqueado = session && adminVerificado
 
   return (
+    <>
+    {(sessionExpirada || sessionCerrada) && (
+      <div className="session-cerrada-overlay">
+        <div className="session-cerrada-card">
+          <span className="session-cerrada-icon" style={sessionExpirada ? { background: '#fde2e1', color: '#b42318' } : {}}>
+            {sessionExpirada ? '🔒' : '✓'}
+          </span>
+          <p className="session-cerrada-titulo">
+            {sessionExpirada ? 'Sesión expirada' : 'Sesión cerrada'}
+          </p>
+          <p className="session-cerrada-sub">
+            {sessionExpirada ? 'Iniciá sesión nuevamente.' : 'Hasta luego.'}
+          </p>
+        </div>
+      </div>
+    )}
     <Routes>
       {/* Raíz */}
       <Route path="/" element={<Navigate to="/catalogo" replace />} />
@@ -173,6 +204,7 @@ export default function App() {
       }>
         <Route path="/catalogo" element={<CatalogoPublico />} />
         <Route path="/cotizar" element={<Cotizar clienteSession={clienteSession} />} />
+        <Route path="/checkout" element={<Checkout />} />
         <Route
           path="/mis-cotizaciones"
           element={
@@ -197,10 +229,12 @@ export default function App() {
         <Route path="/cotizaciones" element={<Cotizaciones />} />
         <Route path="/clientes" element={<Clientes />} />
         <Route path="/proveedores" element={<Proveedores />} />
+        <Route path="/destacados" element={<Destacados />} />
       </Route>
 
       {/* Fallback */}
       <Route path="*" element={<Navigate to="/" replace />} />
     </Routes>
+    </>
   )
 }
