@@ -218,23 +218,30 @@ export default function Checkout() {
           {/* ─── A) RESUMEN DEL PEDIDO ─────────────────────────────────── */}
           <section className="card checkout-section">
             <h3 className="checkout-section-title">📦 Resumen del pedido</h3>
-            <div className="checkout-products">
-              {cotizacion?.productos?.map((producto, idx) => (
-                <div key={idx} className="checkout-product-row">
-                  <div className="checkout-product-info">
-                    <p className="checkout-product-name">{producto.nombre}</p>
-                    <p className="checkout-product-meta">
-                      {producto.cantidad} × {formatearMoneda(producto.precio_unitario)}
-                    </p>
-                  </div>
-                  <p className="checkout-product-subtotal">
-                    {formatearMoneda(producto.subtotal)}
-                  </p>
-                </div>
-              ))}
+            <div className="checkout-products-table-wrap">
+              <table className="table checkout-products-table">
+                <thead>
+                  <tr>
+                    <th>Producto</th>
+                    <th>Cantidad</th>
+                    <th>Precio unit.</th>
+                    <th>Subtotal</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {cotizacion?.productos?.map((producto, idx) => (
+                    <tr key={idx}>
+                      <td>{producto.nombre}</td>
+                      <td>{producto.cantidad}</td>
+                      <td>{formatearMoneda(producto.precio_unitario)}</td>
+                      <td>{formatearMoneda(producto.subtotal)}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
             </div>
             <div className="checkout-total-row">
-              <span>Total de productos:</span>
+              <span>Total del pedido:</span>
               <strong>{formatearMoneda(subtotal)}</strong>
             </div>
           </section>
@@ -243,7 +250,7 @@ export default function Checkout() {
           <section className="card checkout-section">
             <h3 className="checkout-section-title">📋 Datos de facturación</h3>
             <div className="form-group">
-              <label htmlFor="nombre_completo">Nombre completo *</label>
+              <label className="label-form" htmlFor="nombre_completo">Nombre completo *</label>
               <input
                 id="nombre_completo"
                 type="text"
@@ -251,11 +258,11 @@ export default function Checkout() {
                 value={formFacturacion.nombre_completo}
                 onChange={handleFacturacionChange}
                 placeholder="Ej: Juan Pérez"
-                className="form-input"
+                className="input-filtro"
               />
             </div>
             <div className="form-group">
-              <label htmlFor="cuit_dni">CUIT / DNI *</label>
+              <label className="label-form" htmlFor="cuit_dni">CUIT / DNI *</label>
               <input
                 id="cuit_dni"
                 type="text"
@@ -263,11 +270,11 @@ export default function Checkout() {
                 value={formFacturacion.cuit_dni}
                 onChange={handleFacturacionChange}
                 placeholder="Ej: 20123456789"
-                className="form-input"
+                className="input-filtro"
               />
             </div>
             <div className="form-group">
-              <label htmlFor="telefono">Teléfono</label>
+              <label className="label-form" htmlFor="telefono">Teléfono</label>
               <input
                 id="telefono"
                 type="tel"
@@ -275,11 +282,11 @@ export default function Checkout() {
                 value={formFacturacion.telefono}
                 onChange={handleFacturacionChange}
                 placeholder="Ej: +54 11 1234 5678"
-                className="form-input"
+                className="input-filtro"
               />
             </div>
             <div className="form-group">
-              <label htmlFor="direccion_facturacion">Dirección de facturación *</label>
+              <label className="label-form" htmlFor="direccion_facturacion">Dirección de facturación *</label>
               <input
                 id="direccion_facturacion"
                 type="text"
@@ -287,17 +294,17 @@ export default function Checkout() {
                 value={formFacturacion.direccion_facturacion}
                 onChange={handleFacturacionChange}
                 placeholder="Ej: Calle Principal 123"
-                className="form-input"
+                className="input-filtro"
               />
             </div>
             <div className="form-group">
-              <label htmlFor="provincia_facturacion">Provincia *</label>
+              <label className="label-form" htmlFor="provincia_facturacion">Provincia *</label>
               <select
                 id="provincia_facturacion"
                 name="provincia_facturacion"
                 value={formFacturacion.provincia_facturacion}
                 onChange={handleFacturacionChange}
-                className="form-input"
+                className="input-filtro"
               >
                 <option value="">Selecciona una provincia</option>
                 <option value="Buenos Aires">Buenos Aires</option>
@@ -377,7 +384,7 @@ export default function Checkout() {
             {metodoPago === 'tarjeta' && (
               <div className="checkout-tarjeta-fields">
                 <div className="form-group">
-                  <label htmlFor="numero">Número de tarjeta *</label>
+                  <label className="label-form" htmlFor="numero">Número de tarjeta *</label>
                   <input
                     id="numero"
                     type="text"
@@ -385,13 +392,13 @@ export default function Checkout() {
                     value={datosTarjeta.numero}
                     onChange={handleTarjetaChange}
                     placeholder="0000 0000 0000 0000"
-                    className="form-input"
+                    className="input-filtro"
                     maxLength="19"
                   />
                 </div>
                 <div className="form-row">
                   <div className="form-group">
-                    <label htmlFor="vencimiento">Vencimiento *</label>
+                    <label className="label-form" htmlFor="vencimiento">Vencimiento *</label>
                     <input
                       id="vencimiento"
                       type="text"
@@ -399,12 +406,12 @@ export default function Checkout() {
                       value={datosTarjeta.vencimiento}
                       onChange={handleTarjetaChange}
                       placeholder="MM/YY"
-                      className="form-input"
+                      className="input-filtro"
                       maxLength="5"
                     />
                   </div>
                   <div className="form-group">
-                    <label htmlFor="cvv">CVV *</label>
+                    <label className="label-form" htmlFor="cvv">CVV *</label>
                     <input
                       id="cvv"
                       type="text"
@@ -412,7 +419,7 @@ export default function Checkout() {
                       value={datosTarjeta.cvv}
                       onChange={handleTarjetaChange}
                       placeholder="123"
-                      className="form-input"
+                      className="input-filtro"
                       maxLength="4"
                     />
                   </div>
@@ -444,7 +451,7 @@ export default function Checkout() {
             {!mismaFacturacion && (
               <>
                 <div className="form-group">
-                  <label htmlFor="direccion_envio">Dirección de envío *</label>
+                  <label className="label-form" htmlFor="direccion_envio">Dirección de envío *</label>
                   <input
                     id="direccion_envio"
                     type="text"
@@ -452,11 +459,11 @@ export default function Checkout() {
                     value={formEnvio.direccion_envio}
                     onChange={handleEnvioChange}
                     placeholder="Ej: Calle Secundaria 456"
-                    className="form-input"
+                    className="input-filtro"
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="ciudad">Ciudad *</label>
+                  <label className="label-form" htmlFor="ciudad">Ciudad *</label>
                   <input
                     id="ciudad"
                     type="text"
@@ -464,11 +471,11 @@ export default function Checkout() {
                     value={formEnvio.ciudad}
                     onChange={handleEnvioChange}
                     placeholder="Ej: Buenos Aires"
-                    className="form-input"
+                    className="input-filtro"
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="codigo_postal">Código postal *</label>
+                  <label className="label-form" htmlFor="codigo_postal">Código postal *</label>
                   <input
                     id="codigo_postal"
                     type="text"
@@ -476,17 +483,17 @@ export default function Checkout() {
                     value={formEnvio.codigo_postal}
                     onChange={handleEnvioChange}
                     placeholder="Ej: 1425"
-                    className="form-input"
+                    className="input-filtro"
                   />
                 </div>
                 <div className="form-group">
-                  <label htmlFor="provincia_envio">Provincia *</label>
+                  <label className="label-form" htmlFor="provincia_envio">Provincia *</label>
                   <select
                     id="provincia_envio"
                     name="provincia_envio"
                     value={formEnvio.provincia_envio}
                     onChange={handleEnvioChange}
-                    className="form-input"
+                    className="input-filtro"
                   >
                     <option value="">Selecciona una provincia</option>
                     <option value="Buenos Aires">Buenos Aires</option>
@@ -589,7 +596,7 @@ export default function Checkout() {
             </div>
 
             <button
-              className="btn-confirmar-compra"
+              className="btn-primary btn-full"
               onClick={handleConfirmar}
               disabled={procesando}
             >
