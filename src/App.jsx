@@ -2,6 +2,8 @@ import { useEffect, useState } from 'react'
 import { Routes, Route, Navigate, Outlet } from 'react-router-dom'
 import { supabase } from './supabase'
 
+import SplashScreen from './components/SplashScreen'
+
 import PublicNavbar from './components/PublicNavbar'
 import AdminNavbar from './components/AdminNavbar'
 import ChatWidget from './components/ChatWidget'
@@ -76,11 +78,14 @@ function loadClienteSession() {
 }
 
 export default function App() {
-  const [session, setSession]               = useState(undefined)
+  const [session, setSession]                 = useState(undefined)
   const [adminVerificado, setAdminVerificado] = useState(undefined)
-  const [clienteSession, setClienteSession] = useState(loadClienteSession)
+  const [clienteSession, setClienteSession]   = useState(loadClienteSession)
   const [sessionExpirada, setSessionExpirada] = useState(false)
   const [sessionCerrada, setSessionCerrada]   = useState(false)
+
+  // ── NUEVO: controla si el splash está visible ──────────────────────────
+  const [splashVisible, setSplashVisible]     = useState(true)
 
   // Consulta la tabla user_roles para saber si el usuario es admin
   async function checkAdminRole(userId) {
@@ -151,6 +156,11 @@ export default function App() {
 
   // Login solo se bloquea si ya hay sesión admin confirmada
   const loginBloqueado = session && adminVerificado
+
+  // ── NUEVO: mientras splashVisible sea true, mostramos solo el splash ──
+  if (splashVisible) {
+    return <SplashScreen onEnter={() => setSplashVisible(false)} />
+  }
 
   return (
     <>
