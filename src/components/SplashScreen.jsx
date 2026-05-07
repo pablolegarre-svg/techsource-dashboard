@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from "react";
+import { useNavigate, useLocation } from "react-router-dom";
 
 // ─── Constantes ────────────────────────────────────────────────────────────────
 
@@ -21,9 +22,17 @@ const PROGRESS_STEPS = [
 // ─── Componente ────────────────────────────────────────────────────────────────
 
 export default function SplashScreen({ onEnter }) {
+  const navigate = useNavigate();
+  const location = useLocation();
+  
   const [progress,    setProgress]   = useState(0);
   const [statusLabel, setStatus]     = useState("Iniciando...");
   const [showEnter,   setShowEnter]  = useState(false);
+
+  // Detectar si hay parámetros de checkout en la URL
+  const params = new URLSearchParams(location.search);
+  const hasCheckoutParams = params.has('id_cotizacion') && params.has('id_cliente') && params.has('id_gestion');
+  const buttonText = hasCheckoutParams ? "CONTINUAR CON LA COMPRA" : "Ingresar al catálogo →";
 
   // Fases de la transición de salida:
   // "idle" → "exiting" (splash zoom+blur) → "wiping" (cortina barre) → "done" (llama onEnter)
@@ -70,7 +79,18 @@ export default function SplashScreen({ onEnter }) {
     setTimeout(() => setPhase("wiping"), 350);  // Fase 2: cortina entra a los 350ms
     setTimeout(() => {
       setPhase("done");
-      onEnter?.();                    // Fase 3: llama onEnter cuando la cortina cubrió todo
+      
+      // Determinar a dónde navegar
+      if (hasCheckoutParams) {
+        // Navegar a checkout conservando los parámetros
+        navigate(`/checkout${location.search}`);
+      } else {
+        // Comportamiento normal: ir al catálogo
+        navigate('/catalogo');
+      }
+      
+      // Llamar onEnter después de navegar
+      onEnter?.();
     }, 1050);
   };
 
@@ -180,7 +200,7 @@ export default function SplashScreen({ onEnter }) {
           }}
           onClick={handleEnter}
         >
-          Ingresar al catálogo →
+          {buttonText}
         </button>
       </div>
 
