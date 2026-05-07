@@ -146,10 +146,6 @@ export default function Checkout() {
       await new Promise((resolve) => setTimeout(resolve, 1500))
 
       setExito(true)
-      // Redirigir después de 3 segundos
-      setTimeout(() => {
-        navigate('/catalogo')
-      }, 3000)
     } catch (err) {
       alert('Error al procesar la compra. Intenta nuevamente.')
       console.error(err)
@@ -186,14 +182,16 @@ export default function Checkout() {
 
   if (exito) {
     return (
-      <main className="container">
+      <main className="container checkout-success-main">
         <section className="card checkout-success">
           <div className="checkout-success-content">
             <div className="checkout-success-icon">✓</div>
             <h2>¡Compra confirmada!</h2>
-            <p>Tu pedido ha sido procesado correctamente.</p>
-            <p className="checkout-success-sub">Recibirás un email con los detalles de tu compra.</p>
-            <p className="checkout-success-redirect">Redirigiendo al catálogo...</p>
+            <p className="checkout-success-subtitle">Tu pedido fue procesado correctamente.</p>
+            <p className="checkout-success-message">En breve nuestro equipo se va a comunicar con vos para coordinar la entrega.</p>
+            <button className="btn-primary" onClick={() => navigate('/catalogo')}>
+              Volver al catálogo
+            </button>
           </div>
         </section>
       </main>
